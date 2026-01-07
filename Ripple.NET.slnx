@@ -1,5 +1,9 @@
 <Solution>
   <Folder Name="/samples/">
-    <Project Path="samples/MinimalApi/MinimalApi.csproj" />
+    <Project Path="samples/MinimalApi/Api/Api.csproj" />
+    <Project Path="samples/MinimalApi/Client/Client.csproj" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/Ripple.NET/Ripple.NET.csproj" />
   </Folder>
 </Solution>

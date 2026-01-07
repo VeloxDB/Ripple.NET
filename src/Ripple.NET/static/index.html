@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Ripple API Trace & Conflict Analyzer</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.26.0/cytoscape.min.js"></script>
+    <style>
+        :root {
+            --bg-dark: #1e1e1e;
+            --bg-panel: #252526;
+            --bg-item: #2d2d30;
+            --text-main: #d4d4d4;
+            --accent: #569cd6;
+            --read-color: #4e944f;
+            --write-color: #f44747;
+            --border: #333;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-main);
+            margin: 0;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Sidebar Navigation */
+        .sidebar {
+            width: 220px;
+            background: var(--bg-panel);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            padding: 20px 0;
+        }
+
+        .sidebar-header {
+            padding: 0 20px 20px;
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #fff;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 10px;
+        }
+
+        .nav-item {
+            padding: 12px 20px;
+            cursor: pointer;
+            transition: background 0.2s;
+            color: #aaa;
+        }
+
+        .nav-item:hover {
+            background: #333;
+        }
+
+        .nav-item.active {
+            background: #37373d;
+            color: var(--accent);
+            border-left: 3px solid var(--accent);
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .toolbar {
+            padding: 15px 25px;
+            background: var(--bg-panel);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            gap: 10px;
+        }
+
+        .view-pane {
+            flex: 1;
+            overflow-y: auto;
+            padding: 25px;
+            display: none;
+        }
+
+        .view-pane.active {
+            display: block;
+        }
+
+        /* Conflict Table Styles */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--bg-panel);
+        }
+
+        th,
+        td {
+            text-align: left;
+            padding: 12px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            color: var(--accent);
+            font-size: 0.8em;
+            text-transform: uppercase;
+        }
+
+        /* Graph View Container */
+        #cy {
+            width: 100%;
+            height: 100%;
+            background: #111;
+        }
+
+        /* Reuse Original Styles from */
+        .group {
+            border: 1px solid var(--border);
+            margin-bottom: 24px;
+            border-radius: 8px;
+            background: var(--bg-panel);
+        }
+
+        .group-header {
+            background: #333;
+            padding: 12px 15px;
+            font-weight: bold;
+            color: var(--accent);
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .api-call {
+            margin: 12px;
+            padding: 12px;
+            background: var(--bg-item);
+            border-radius: 4px;
+            border-left: 3px solid #4ec9b0;
+        }
+
+        .api-call-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .api-call-header label {
+            font-size: 0.7em;
+            color: #888;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+
+        .api-call-header input[type="checkbox"] {
+            cursor: pointer;
+            margin: 0;
+        }
+
+        /* Comparison View */
+        .comparison-grid {
+            display: flex;
+            gap: 20px;
+            overflow-x: auto;
+            padding-bottom: 20px;
+            height: calc(100vh - 150px);
+        }
+
+        .compare-col {
+            min-width: 450px;
+            max-width: 450px;
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .compare-header {
+            padding: 15px;
+            background: #333;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .compare-body {
+            padding: 15px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .transaction {
+            margin: 8px 0 8px 15px;
+            padding: 10px;
+            border: 1px solid #3e3e42;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 4px;
+        }
+
+        .label {
+            font-size: 0.7em;
+            text-transform: uppercase;
+            opacity: 0.5;
+            display: block;
+            margin-top: 8px;
+            margin-bottom: 4px;
+            font-weight: bold;
+        }
+
+        .type-tag {
+            display: inline-block;
+            padding: 2px 6px;
+            margin: 2px;
+            border-radius: 3px;
+            font-size: 0.85em;
+            font-family: monospace;
+        }
+
+        .read {
+            background: #2e4e31;
+            color: #b5cea8;
+            border: 1px solid var(--read-color);
+        }
+
+        .write {
+            background: #4e2e2e;
+            color: #ce9178;
+            border: 1px solid #944e4e;
+        }
+
+        .participant-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .sql-list {
+            margin-top: 8px;
+            list-style: none;
+            padding: 0;
+            border-top: 1px solid #333;
+        }
+
+        .sql-item {
+            font-family: monospace;
+            font-size: 0.85em;
+            background: #111;
+            padding: 8px;
+            margin-top: 4px;
+            border-radius: 3px;
+            white-space: pre-wrap;
+            border-left: 2px solid var(--accent);
+        }
+
+        .btn {
+            padding: 6px 14px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 0.85em;
+            background: #333;
+            color: #ccc;
+            border: 1px solid #454545;
+        }
+
+        .btn-write {
+            border-color: #7a2a2a;
+            color: #e0a0a0;
+        }
+
+        .btn-write:hover {
+            background: #4e2e2e;
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav class="sidebar">
+        <div class="sidebar-header">Ripple Trace</div>
+        <div class="nav-item active" onclick="showView('trace')">API Trace Logs</div>
+        <div class="nav-item" onclick="showView('conflicts')">Conflict Matrix</div>
+        <div class="nav-item" onclick="showView('graph')">Abstract History Graph</div>
+        <div class="nav-item" id="comparison-view-nav" onclick="showView('comparison')">Comparison View (0)</div>
+    </nav>
+
+    <main class="main-content">
+        <div class="toolbar">
+            <button class="btn" onclick="location.reload()">Refresh</button>
+            <button class="btn" onclick="exportData()">Export</button>
+            <button class="btn btn-write" onclick="document.getElementById('fileInput').click()">Merge</button>
+            <button class="btn btn-write" onclick="clearData()">Clear</button>
+            <input type="file" id="fileInput" style="display:none" onchange="mergeData(this)">
+        </div>
+
+        <div id="view-trace" class="view-pane active">
+            <div id="container">Loading trace data...</div>
+        </div>
+
+        <div id="view-conflicts" class="view-pane">
+            <h2>Conflict Matrix</h2>
+            <p style="font-size: 0.9em; color: #888;">Resources accessed by multiple calls.</p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Resource Tag</th>
+                        <th>Contending API Calls</th>
+                    </tr>
+                </thead>
+                <tbody id="conflict-table-body"></tbody>
+            </table>
+        </div>
+
+        <div id="view-graph" class="view-pane" style="padding: 0;">
+            <div id="cy"></div>
+        </div>
+        <div id="view-comparison" class="view-pane">
+            <h2>Comparison View</h2>
+            <div class="comparison-grid" id="compare-grid">
+                <div style="text-align: center; width: 100%; padding-top: 100px; opacity: 0.5;">
+                    <h3>No APIs selected for comparison.</h3>
+                    <p>Go to the Trace List and select checkboxes to compare SQL side-by-side.</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        let globalData = [];
+        let selected = new Set();
+        let reentryGuard = false;
+
+        async function loadData() {
+            try {
+                const response = await fetch('/ripple/data');
+                globalData = await response.json();
+                renderTrace(globalData);
+                analyzeConflicts(globalData);
+            } catch (err) {
+                document.getElementById('container').innerText = 'Error: ' + err;
+            }
+        }
+
+        function showView(viewId) {
+            document.querySelectorAll('.view-pane').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            document.getElementById('view-' + viewId).classList.add('active');
+            event.target.classList.add('active');
+
+            if (viewId === 'graph') initGraph();
+            if (viewId === 'comparison') renderComparison();
+        }
+
+        function renderTrace(groups) {
+            const container = document.getElementById('container');
+            container.innerHTML = '';
+            groups.forEach(group => {
+                const hasCalls = group.value && group.value.length > 0;
+                const groupEl = document.createElement('div');
+                groupEl.className = `group ${!hasCalls ? 'empty-group' : ''}`;
+                groupEl.innerHTML = `<div class="group-header"><span>${group.key}</span><span>${hasCalls ? group.value.length + ' calls' : ''}</span></div>`;
+
+                if (hasCalls) {
+                    group.value.forEach((call, idx) => {
+                        const callEl = document.createElement('div');
+                        callEl.className = 'api-call';
+
+                        const isChecked = selected.has(call) ? 'checked' : '';
+
+                        callEl.innerHTML = `
+                                <div class="api-call-header">
+                                    <label>
+                                        <input type="checkbox" ${isChecked}">
+                                        INSTANCE #${idx + 1}
+                                    </label>
+                                </div>`;
+
+                        const inputEl = callEl.querySelector('input')
+                        inputEl.addEventListener('change', (e) => changeHandler(e, call));
+                        if (!call.checkboxes) {
+                            call.checkboxes = [];
+                        }
+                        call.checkboxes.push(inputEl);
+
+                        if (call.transactions) {
+                            call.transactions.forEach(tx => {
+                                const txEl = renderTransaction(tx);
+                                callEl.appendChild(txEl);
+                            });
+                        }
+
+                        if (call.commands?.length) {
+                            let commandsHtml = `
+                                    <div class="commands-container">
+                                        <details>
+                                            <summary class="commands-summary">View SQL Commands (${call.commands.length})</summary>
+                                            <ul class="sql-list">
+                                                ${call.commands.map(cmd => `<li class="sql-item">${escapeHtml(cmd)}</li>`).join('')}
+                                            </ul>
+                                        </details>
+                                    </div>`;
+
+                            callEl.insertAdjacentHTML('beforeend', commandsHtml);
+                        }
+
+                        groupEl.appendChild(callEl);
+                    });
+                }
+                container.appendChild(groupEl);
+            });
+        }
+
+        function changeHandler(e, call) {
+            if(e.isTrusted)
+                toggleSelection(call);
+        }
+
+        function toggleSelection(...calls) {
+            if (reentryGuard) return;
+            reentryGuard = true;
+            // If any call is NOT in the set, we want to add them all (Select All).
+            const shouldSelect = calls.some(call => !selected.has(call));
+
+            calls.forEach(call => {
+                if (shouldSelect) {
+                    selected.add(call);
+                } else {
+                    selected.delete(call);
+                }
+                if (call.checkboxes) {
+                    call.checkboxes.forEach(cb => {
+                        cb.checked = shouldSelect;
+                    });
+                }
+            });
+
+            const navElement = document.getElementById('comparison-view-nav');
+            if (navElement) {
+                navElement.innerText = `Comparison View (${selected.size})`;
+            }
+            reentryGuard = false;
+        }
+
+        function renderTransaction(tx) {
+            const div = document.createElement('div');
+            div.className = 'transaction';
+            let html = '';
+
+            if (tx.readTypes?.length) {
+                html += `<span class="label">Reads</span>`;
+                tx.readTypes.forEach(t => html += `<span class="type-tag read">${t}</span>`);
+            }
+
+            if (tx.writeTypes?.length) {
+                html += `<span class="label">Writes</span>`;
+                tx.writeTypes.forEach(t => html += `<span class="type-tag write">${t}</span>`);
+            }
+
+
+            if (tx.children?.length) {
+                html += `<span class="label">Child Transactions</span>`;
+            }
+
+            div.innerHTML = html;
+
+            if (tx.children?.length) {
+                tx.children.forEach(child => div.appendChild(renderTransaction(child)));
+            }
+            return div;
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function getCallOperations(call) {
+            const reads = new Set();
+            const writes = new Set();
+
+            const processTx = (tx) => {
+                if (tx.readTypes) tx.readTypes.forEach(t => reads.add(t));
+                if (tx.writeTypes) tx.writeTypes.forEach(t => writes.add(t));
+                if (tx.children) tx.children.forEach(processTx);
+            };
+
+            if (call.transactions) {
+                call.transactions.forEach(processTx);
+            }
+
+            return { reads, writes };
+        }
+
+        function analyzeConflicts(groups) {
+            // resourceMap structure: { "tagName": { readers: Set, writers: Set } }
+            const resourceMap = {};
+
+            groups.forEach(g => {
+                g.value.forEach((call, idx) => {
+                    const { reads, writes } = getCallOperations(call);
+
+                    const register = (tag, type) => {
+                        if (!resourceMap[tag]) {
+                            resourceMap[tag] = { readers: new Set(), writers: new Set() };
+                        }
+                        resourceMap[tag][type].add(call);
+                    };
+
+                    reads.forEach(tag => register(tag, 'readers'));
+                    writes.forEach(tag => register(tag, 'writers'));
+                });
+            });
+
+            const tbody = document.getElementById('conflict-table-body');
+            tbody.innerHTML = '';
+
+            Object.entries(resourceMap).forEach(([tag, ops]) => {
+                const totalParticipants = Array.from(new Set([...ops.readers, ...ops.writers]));
+
+                // A conflict occurs if there is at least one writer 
+                // AND more than one total API call interacting with the resource
+                if (ops.writers.size > 0 && totalParticipants.length > 1) {
+                    const row = tbody.insertRow();
+
+                    // Format output to show who is writing vs reading
+                    const participantList = totalParticipants.map(call => {
+                        const isWriter = ops.writers.has(call);
+                        return `<span class="${isWriter ? 'write' : 'read'}" 
+                              style="padding: 2px 4px; border-radius: 3px; font-size: 0.8em;">
+                            <input type="checkbox" ${selected.has(call) ? 'checked' : ''} />
+                              ${call.name}${isWriter ? ' (W)' : ' (R)'}
+                        </span>`;
+                    }).join(' ');
+
+                    row.insertCell(0).innerHTML = `<span class="type-tag">${tag}</span>`;
+                    row.insertCell(1).innerHTML = `<div class="participant-list">${participantList}</div>`;
+
+                    // Add event listeners to checkboxes
+                    const checkboxes = row.querySelectorAll('input[type="checkbox"]');
+                    checkboxes.forEach((cb, index) => {
+                        const call = totalParticipants[index];
+                        cb.addEventListener('change', (e) => changeHandler(e, call));
+                        if (!call.checkboxes) {
+                            call.checkboxes = [];
+                        }
+                        call.checkboxes.push(cb);
+                    });
+                }
+            });
+        }
+
+        function initGraph() {
+            const elements = [];
+            const resourceMap = {};
+
+            // 1. Build Nodes and Map Resources (using the recursive helper)
+            globalData.forEach(g => {
+                g.value.forEach((call, idx) => {
+                    const callId = `${g.key}_${idx}`;
+                    elements.push({ data: { id: callId, label: `${g.key} #${idx + 1}`, call: call }, selected: selected.has(call) });
+
+                    const { reads, writes } = getCallOperations(call);
+                    const allTags = new Set([...reads, ...writes]);
+
+                    allTags.forEach(tag => {
+                        if (!resourceMap[tag]) resourceMap[tag] = { readers: [], writers: [] };
+                        if (writes.has(tag)) resourceMap[tag].writers.push({id:callId, call:call});
+                        else resourceMap[tag].readers.push({id:callId, call:call});
+                    });
+                });
+            });
+
+            // 2. Build Edges (Conflicts: Write-Write or Write-Read)
+            Object.entries(resourceMap).forEach(([tag, ops]) => {
+                const allParticipants = [...ops.writers, ...ops.readers];
+
+                for (let i = 0; i < allParticipants.length; i++) {
+                    for (let j = i; j < allParticipants.length; j++) {
+                        const p1 = allParticipants[i];
+                        const p2 = allParticipants[j];
+
+                        const p1IsWriter = ops.writers.includes(p1);
+                        const p2IsWriter = ops.writers.includes(p2);
+                        // Edge exists if at least one is a writer
+                        if (p1IsWriter || p2IsWriter) {
+                            elements.push({
+                                data: {
+                                    source: p1.id,
+                                    target: p2.id,
+                                    sourceCall: p1.call,
+                                    targetCall: p2.call,
+                                    label: `${tag}(${p1IsWriter && p2IsWriter ? 'W' : 'R'})`,
+                                    color: p1IsWriter && p2IsWriter ? '#f44747' : '#ff9900'
+                                }
+                            });
+                        }
+                    }
+                }
+            });
+
+            const cy = cytoscape({
+                container: document.getElementById('cy'),
+                elements: elements,
+                style: [
+                    { selector: 'node', style: { 'background-color': '#569cd6', 'label': 'data(label)', 'color': '#fff', 'font-size': '10px' } },
+                    { selector: 'node:selected', style: { 'border-width': 4, 'border-color': '#4ec9b0', 'border-opacity': 1, 'background-color': '#37373d' } },
+                    { selector: 'edge', style: { 'width': 2, 'line-color': 'data(color)', 'curve-style': 'bezier', 'label': 'data(label)', 'font-size': '8px', 'color': '#ccc' } }
+                ],
+                layout: {
+                    name: 'circle',
+                    spacingFactor: 0.5,
+                    fit: true,
+                    padding: 30,
+                    animate: true,
+                    animationDuration: 500,
+                    radius: undefined,
+                    sort: undefined
+                },
+                selectionType: 'additive',
+                boxSelectionEnabled: false,
+                wheelSensitivity: 0.1
+            });
+
+            cy.on('select unselect', 'node', function (evt) {
+                console.log(evt);
+                const call = evt.target.data('call');
+                toggleSelection(call);
+            });
+
+            cy.on('tap', 'edge', function(evt) {
+                const edgeData = evt.target.data();
+                toggleSelection(edgeData.sourceCall, edgeData.targetCall);
+
+                reentryGuard = true; // Prevent reentry during programmatic selection
+                if(selected.has(edgeData.sourceCall) && selected.has(edgeData.targetCall)) {
+                    // Select nodes in the graph
+                    cy.getElementById(edgeData.source).select();
+                    cy.getElementById(edgeData.target).select();
+                }else{
+                    // Deselect nodes in the graph
+                    cy.getElementById(edgeData.source).unselect();
+                    cy.getElementById(edgeData.target).unselect();
+                }
+                reentryGuard = false;
+            });
+        }
+
+        function renderComparison() {
+            const grid = document.getElementById('compare-grid');
+            if (selected.length === 0) return;
+            grid.innerHTML = '';
+
+            selected.forEach(call => {
+                const reads = [...new Set(call.transactions?.flatMap(tx => tx.readTypes || []) || [])];
+                const writes = [...new Set(call.transactions?.flatMap(tx => tx.writeTypes || []) || [])];
+
+                const col = document.createElement('div');
+                col.className = 'compare-col';
+                let callHtml = `<div class="compare-header">
+                        <div style="color: var(--accent); font-weight: bold;">${call.name}</div>
+                    </div>
+                    <div class="compare-body">
+                        <div style="margin-bottom: 15px;">
+                            <div style="font-size: 0.7em; font-weight: bold; margin-bottom: 5px; opacity: 0.5;">DATA ACCESS</div>
+                            ${reads.map(r => `<span class="type-tag read">${r}</span>`).join('')}
+                            ${writes.map(w => `<span class="type-tag write">${w}</span>`).join('')}
+                        </div>
+                        <div style="font-size: 0.7em; font-weight: bold; margin-bottom: 5px; opacity: 0.5;">SQL SEQUENCE</div>`;
+
+                if (!call.commands || call.commands.length === 0) {
+                    callHtml += `<div>No SQL commands recorded.</div>`;
+                } else {
+                    callHtml += `
+                    <ul class="sql-list">
+                        ${call.commands?.map(cmd => `<li class="sql-item">${escapeHtml(cmd)}</li>`).join('')}
+                    </ul>`;
+                }
+
+                callHtml += `</div>`;
+                col.innerHTML = callHtml;
+
+                grid.appendChild(col);
+            });
+        }
+
+
+        async function exportData() {
+            try {
+                const response = await fetch('/ripple/data');
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'ripple_trace_data.json'; // Forces download dialog
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                a.remove();
+            } catch (err) {
+                alert('Export failed: ' + err);
+            }
+        }
+
+        async function mergeData(input) {
+            if (!input.files || input.files.length === 0) return;
+
+            const formData = new FormData();
+            formData.append('file', input.files[0]);
+
+            try {
+                const response = await fetch('/ripple/merge', {
+                    method: 'POST',
+                    body: formData
+                });
+                if (response.ok) {
+                    location.reload();
+                } else {
+                    alert('Merge failed: ' + response.statusText);
+                }
+            } catch (err) {
+                alert('Error during merge: ' + err);
+            }
+        }
+
+        async function clearData() {
+            if (!confirm('Are you sure you want to clear all recorded calls?')) return;
+
+            try {
+                const response = await fetch('/ripple/clear', { method: 'POST' });
+                if (response.ok) {
+                    location.reload();
+                }
+            } catch (err) {
+                alert('Clear failed: ' + err);
+            }
+        }
+
+        loadData();
+    </script>
+</body>
+
+</html>
