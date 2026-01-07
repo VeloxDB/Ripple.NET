@@ -73,17 +73,11 @@ app.UseRipple();
 ### **4\. Analyze Data**
 
 Run your application and perform some API requests. Then, navigate to:  
-http://localhost:\<port\>/ripple
+http:\/\/localhost:\<port\>/ripple
 
 ## **Contributing**
 
-We welcome contributions\! As the project is in its early stages, we are looking for help with:
-
-* Refining the Abstract History Graph visualization.  
-* Supporting more database providers beyond SQLite/SQL Server.  
-* Performance benchmarking.
-
-Please check out the [Discussions](https://www.google.com/search?q=https://github.com/your-repo/ripple-net/discussions) tab to see where you can help.
+We welcome contributions! Please check out the [Discussions](https://github.com/VeloxDB/Ripple.NET/discussions) tab to see where you can help.
 
 ## **License**
 
