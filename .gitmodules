@@ -1,0 +1,3 @@
+[submodule "samples/DevLeaderBlog"]
+	path = samples/DevLeaderBlog
+	url = https://github.com/ncosentino/DevLeaderBlog.git
