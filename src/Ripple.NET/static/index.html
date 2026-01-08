@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Ripple API Trace & Conflict Analyzer</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.26.0/cytoscape.min.js"></script>
+    <script src="/ripple/cytoscape.min.js"></script>
     <style>
         :root {
             --bg-dark: #1e1e1e;
@@ -623,7 +623,7 @@
                 },
                 selectionType: 'additive',
                 boxSelectionEnabled: false,
-                wheelSensitivity: 0.1
+                wheelSensitivity: 3
             });
 
             cy.on('select unselect', 'node', function (evt) {
