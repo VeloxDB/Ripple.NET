@@ -1,0 +1,12 @@
+﻿@using Blazored.Toast.Configuration
+@inherits LayoutComponentBase
+
+<BlazoredToasts Position="ToastPosition.BottomRight" />
+<div class="position-relative min-vh-100">
+    <NavMenu/>
+
+    <main class="pb-5">
+        @Body
+    </main>
+    <Footer></Footer>
+</div>

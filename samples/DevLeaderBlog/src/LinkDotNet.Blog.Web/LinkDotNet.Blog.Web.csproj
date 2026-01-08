@@ -1,0 +1,36 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+			  <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+         <PackageReference Include="AspNetCore.HealthChecks.UI.Client" />
+         <PackageReference Include="Azure.Storage.Blobs" />
+         <PackageReference Include="Blazor-Analytics" />
+         <PackageReference Include="Blazored.Toast" />
+         <PackageReference Include="Blazorise.Bootstrap5" />
+         <PackageReference Include="Blazorise.Markdown" />
+         <PackageReference Include="Microsoft.Extensions.Logging.ApplicationInsights" />
+         <PackageReference Include="NCronJob" />
+         <PackageReference Include="Markdig" />
+         <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" />
+         <PackageReference Include="Microsoft.Extensions.Options" />
+			   <PackageReference Include="ReverseMarkdown" />
+         <PackageReference Include="System.ServiceModel.Syndication" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\LinkDotNet.Blog.Domain\LinkDotNet.Blog.Domain.csproj" />
+        <ProjectReference Include="..\LinkDotNet.Blog.Infrastructure\LinkDotNet.Blog.Infrastructure.csproj" />
+        <ProjectReference Include="..\..\..\..\src\Ripple.NET\Ripple.NET.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Content Update="wwwroot\ads.txt">
+        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      </Content>
+    </ItemGroup>
+</Project>

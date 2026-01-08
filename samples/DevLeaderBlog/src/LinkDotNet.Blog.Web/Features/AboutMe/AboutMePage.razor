@@ -1,0 +1,36 @@
+@page "/AboutMe"
+@using LinkDotNet.Blog.Web.Features.AboutMe.Components
+@using LinkDotNet.Blog.Domain
+@inject IOptions<ApplicationConfiguration> AppConfiguration
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager NavigationManager
+@inject IOptions<ProfileInformation> ProfileInformation
+
+<PageTitle>About Me - @ProfileInformation.Value.Name</PageTitle>
+
+@if (AppConfiguration.Value.IsAboutMeEnabled)
+{
+    <OgData Title="@("About Me - " + ProfileInformation.Value.Name)"
+            Description="@("About Me," + ProfileInformation.Value.Name)"
+            Keywords="@ProfileInformation.Value.Name"
+            AbsolutePreviewImageUrl="@ImageUrl"></OgData>
+
+    <div class="container">
+        <div class="row">
+            <Profile ShowAdminActions="@isAuthenticated" ProfileInformation="ProfileInformation.Value" />
+        </div>
+    </div>
+}
+
+@code {
+    private bool isAuthenticated;
+
+    private string ImageUrl => ProfileInformation.Value.ProfilePictureUrl.ToAbsoluteUrl(NavigationManager.BaseUri);
+
+    protected override async Task OnInitializedAsync()
+    {
+	    var principal = (await AuthenticationStateProvider.GetAuthenticationStateAsync()).User;
+	    var userIdentity = principal.Identity;
+	    isAuthenticated = (userIdentity?.IsAuthenticated ?? false) && principal.IsInRole("Admin");
+    }
+}

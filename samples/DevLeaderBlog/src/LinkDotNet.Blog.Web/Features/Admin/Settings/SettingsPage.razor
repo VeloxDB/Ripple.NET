@@ -1,0 +1,55 @@
+@page "/settings"
+@using LinkDotNet.Blog.Web.Features.Services
+@using NCronJob
+@inject IOptions<ApplicationConfiguration> ApplicationConfiguration
+@inject ICacheInvalidator CacheInvalidator
+@inject IToastService ToastService
+@inject IInstantJobRegistry InstantJobRegistry
+@attribute [Authorize]
+
+<PageTitle>Settings</PageTitle>
+
+<div class="container">
+	<h3 class="fw-bold">Settings</h3>
+	<table class="table table-responsive table-hover">
+		<thead>
+		<tr>
+			<th scope="col">Configuration Name</th>
+			<th scope="col">Description</th>
+			<th scope="col">Value</th>
+			<th scope="col">Actions</th>
+		</tr>
+		</thead>
+		<tbody>
+		<tr>
+			<td>Cache Duration (First Page)</td>
+			<td>Defines how long the first page remains cached before a refresh is required.<br/>
+			The longer the cache lives, the longer it takes for the user to see updated content on the first page, but the faster the page loads.<br/>
+				You can manually invalidate the cache.</td>
+			<td>@ApplicationConfiguration.Value.FirstPageCacheDurationInMinutes Minutes</td>
+			<td><button class="btn btn-warning" id="invalidate-cache" @onclick="InvalidateCache">Invalidate Cache</button></td>
+		</tr>
+		<tr>
+			<td>Run Visit Counter Data Collection</td>
+			<td>The visit counter data collection is a background job that collects the visit data of the blog posts.<br/>
+				The job runs every 10 minutes. The job can be run on demand.</td>
+			<td>10 Minutes</td>
+			<td><button class="btn btn-warning" id="run-visit-transformer" @onclick="RunVisitTransformer">Run Transformer</button></td>
+		</tr>
+		</tbody>
+	</table>
+</div>
+
+@code {
+	private void InvalidateCache()
+	{
+		CacheInvalidator.Cancel();
+		ToastService.ShowInfo("Cache was invalidated.");
+	}
+
+	private void RunVisitTransformer()
+	{
+		InstantJobRegistry.RunInstantJob<TransformBlogPostRecordsJob>();
+		ToastService.ShowInfo("Transformer was started.");
+	}
+}

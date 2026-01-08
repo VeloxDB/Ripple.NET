@@ -1,0 +1,45 @@
+﻿@page "/update/{blogPostId}"
+@attribute [Authorize]
+@using LinkDotNet.Blog.Domain
+@using LinkDotNet.Blog.Infrastructure.Persistence
+@using LinkDotNet.Blog.Web.Features.Admin.BlogPostEditor.Components
+@inject IRepository<BlogPost> BlogPostRepository
+@inject IToastService ToastService
+
+<PageTitle>Updating: @blogPostFromDb?.Title</PageTitle>
+
+@if (blogPostFromDb is not null)
+{
+    <CreateNewBlogPost
+        Title="Update Blog Post"
+        BlogPost="@blogPostFromDb"
+        OnBlogPostCreated="@StoreBlogPostAsync"
+        ClearAfterCreated="false"></CreateNewBlogPost>
+}
+else
+{
+    <Loading></Loading>
+}
+
+@code {
+    [Parameter, EditorRequired]
+    public required string BlogPostId { get; set; }
+
+    private BlogPost? blogPostFromDb;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        ArgumentException.ThrowIfNullOrEmpty(BlogPostId);
+
+        blogPostFromDb = await BlogPostRepository.GetByIdAsync(BlogPostId);
+    }
+
+    private async Task StoreBlogPostAsync(BlogPost blogPost)
+    {
+	    ArgumentNullException.ThrowIfNull(blogPostFromDb);
+
+        blogPostFromDb.Update(blogPost);
+        await BlogPostRepository.StoreAsync(blogPostFromDb);
+        ToastService.ShowInfo($"Updated BlogPost {blogPost.Title}");
+    }
+}

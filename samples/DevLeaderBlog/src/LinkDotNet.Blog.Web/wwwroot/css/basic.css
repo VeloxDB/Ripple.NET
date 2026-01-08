@@ -1,0 +1,168 @@
+﻿:root, html[data-bs-theme='light'] {
+    /* Fonts */
+    --default-font: 'Calibri';
+    --code-font: 'Lucida Console', 'Courier New';
+
+	/* Color definitions */
+	--wild-sand: #f4f4f4;
+	--silver: #dadada;
+	--waterloo: rgba(140, 140, 162, 0.25);
+
+	/* Usages */
+	--background: var(--wild-sand);
+	--tag-background: var(--waterloo);
+
+	--background-gradient-start: var(--wild-sand);
+	--background-gradient-end: var(--silver);
+
+    /* Override some Bootstrap defaults */
+    --bs-body-font-weight: 300;
+    --bs-nav-link-font-weight: 300;
+}
+
+html[data-bs-theme='dark'] {
+	/* Color definitions */
+	--jaguar: rgb(17, 16, 19);
+	--shark: rgb(40, 40, 47);
+	--trout: rgba(78, 78, 93, 0.5);
+
+	/* Usages */
+	--background: var(--jaguar);
+	--tag-background: var(--trout);
+
+	--background-gradient-start: var(--jaguar);
+	--background-gradient-end: var(--shark);
+
+    /* Override some Bootstrap defaults */
+    --bs-body-font-weight: 300;
+    --bs-nav-link-font-weight: 300;
+}
+
+html {
+    height: 100%;
+}
+
+html:focus-within {
+    scroll-behavior: smooth;
+}
+
+body {
+    margin: 0;
+    background-image: linear-gradient(to bottom, var(--background-gradient-start) 20%, var(--background-gradient-end));
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    font-family: var(--default-font), sans-serif !important;
+    min-height: 100vh;
+    text-rendering: optimizeSpeed;
+}
+
+a {
+    transition: 0.3s ease-in-out !important;
+    font-weight: 500;
+}
+
+.disabled a {
+    font-weight: 400;
+}
+
+h1 {
+    word-wrap: break-word;
+}
+
+blockquote {
+    padding-left: 0.5em;
+}
+
+blockquote::before {
+    content: open-quote;
+    vertical-align: -0.4em;
+    line-height: 0.1em;
+    font-size: 2.5em;
+}
+
+blockquote::after {
+    content: close-quote;
+    vertical-align: -0.4em;
+    line-height: 0.1em;
+    font-size: 2.5em;
+}
+
+blockquote p {
+    display: inline;
+}
+
+section {
+    padding-bottom: 10px;
+}
+
+code {
+    font-family: var(--code-font), cursive;
+}
+
+.date:before {
+    font-family: 'icons';
+    font-weight: 900;
+    content: "\e953";
+}
+
+.theme-toggle:before {
+	font-family: 'icons';
+	font-weight: 900;
+	content: "\e9d5";
+}
+
+.copy-btn {
+	border-color: whitesmoke !important;
+}
+
+.copy-btn:active {
+	animation: copy-flash 0.5s ease-out;
+}
+
+@keyframes copy-flash {
+	50% {
+		border-color: whitesmoke !important;
+		background: whitesmoke;
+	}
+}
+
+/* Template defined css */
+.valid.modified:not([type=checkbox]) {
+    outline: 1px solid #26b050;
+}
+
+.invalid {
+    outline: 1px solid red;
+}
+
+.validation-message {
+    color: red;
+}
+
+/* Fixes white background/white icon for markdown editors */
+.editor-toolbar {
+	background: rgb(36, 90, 170) !important;
+}
+
+.editor-toolbar button.active, .editor-toolbar button:hover {
+    background: rgb(36, 90, 170) !important;
+}
+
+#blazor-error-ui {
+    background: lightyellow;
+    bottom: 0;
+    box-shadow: 0 -1px 2px rgba(0, 0, 0, 0.2);
+    display: none;
+    left: 0;
+    padding: 0.6rem 1.25rem 0.7rem 1.25rem;
+    position: fixed;
+    width: 100%;
+    z-index: 1000;
+}
+
+#blazor-error-ui .dismiss {
+    cursor: pointer;
+    position: absolute;
+    right: 0.75rem;
+    top: 0.5rem;
+}

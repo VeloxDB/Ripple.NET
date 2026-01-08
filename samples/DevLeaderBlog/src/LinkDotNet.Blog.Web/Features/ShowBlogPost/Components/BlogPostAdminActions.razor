@@ -1,0 +1,42 @@
+﻿@using LinkDotNet.Blog.Domain
+@using LinkDotNet.Blog.Infrastructure.Persistence
+@using NCronJob
+@inject NavigationManager NavigationManager
+@inject IToastService ToastService
+@inject IRepository<BlogPost> BlogPostRepository
+@inject IInstantJobRegistry InstantJobRegistry
+
+<AuthorizeView Roles="Admin">
+	<div class="d-flex justify-content-start gap-2">
+		<a id="edit-blogpost" type="button" class="btn btn-primary d-flex align-items-center gap-2" href="update/@BlogPostId" aria-label="edit">
+			<i class="pencil"></i>
+			<div class="vr"></div><span>Edit</span>
+		</a>
+		<button id="delete-blogpost" type="button" class="btn btn-danger d-flex align-items-center gap-2" @onclick="ShowConfirmDialog" aria-label="delete">
+			<i class="bin2"></i>
+			<div class="vr"></div><span>Delete</span>
+		</button>
+	</div>
+	<ConfirmDialog @ref="ConfirmDialog" Title="Delete Blog Post" Content="Do you want to delete the Blog Post?" OnYesPressed="@DeleteBlogPostAsync">
+	</ConfirmDialog>
+</AuthorizeView>
+
+@code {
+    [Parameter, EditorRequired]
+    public required string BlogPostId { get; set; }
+
+    private ConfirmDialog ConfirmDialog { get; set; } = default!;
+
+    private async Task DeleteBlogPostAsync()
+    {
+        await BlogPostRepository.DeleteAsync(BlogPostId);
+        InstantJobRegistry.RunInstantJob<SimilarBlogPostJob>(true);
+        ToastService.ShowSuccess("The Blog Post was successfully deleted");
+        NavigationManager.NavigateTo("/");
+    }
+
+    private void ShowConfirmDialog()
+    {
+        ConfirmDialog.Open();
+    }
+}

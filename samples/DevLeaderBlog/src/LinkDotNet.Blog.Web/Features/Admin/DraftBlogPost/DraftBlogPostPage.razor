@@ -1,0 +1,29 @@
+﻿@page "/draft"
+@using LinkDotNet.Blog.Domain
+@using LinkDotNet.Blog.Infrastructure
+@using LinkDotNet.Blog.Infrastructure.Persistence
+@attribute [Authorize]
+@inject IRepository<BlogPost> BlogPostRepository
+
+<PageTitle>Drafts</PageTitle>
+
+<div class="container">
+	<h3 class="fw-bold">Draft Blog Posts</h3>
+
+	<div class="content px-4">
+		@for (var i = 0; i < blogPosts.Count; i++)
+		{
+			<ShortBlogPost BlogPost="blogPosts[i]" UseAlternativeStyle="@(i % 2 != 0)"></ShortBlogPost>
+		}
+	</div>
+</div>
+
+@code {
+    private IReadOnlyList<BlogPost> blogPosts = PagedList<BlogPost>.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        blogPosts = await BlogPostRepository.GetAllAsync(p => !p.IsPublished, b => b.UpdatedDate);
+    }
+
+}

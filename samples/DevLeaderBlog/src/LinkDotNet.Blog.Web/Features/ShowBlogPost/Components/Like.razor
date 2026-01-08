@@ -1,0 +1,63 @@
+﻿@using LinkDotNet.Blog.Domain
+@using LinkDotNet.Blog.Web.Features.Services
+@inject ILocalStorageService LocalStorage
+<button class="d-flex align-items-center btn btn-outline-secondary gap-2 rounded-pill" @onclick="LikeBlogPost">
+	<span class="clap-btn @BtnClass"></span><div class="vr"></div><span class="px-2" id="like-counter">@BlogPost.Likes</span>
+</button>
+
+@code {
+    [Parameter, EditorRequired]
+    public required BlogPost BlogPost { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> OnBlogPostLiked { get; set; }
+
+    private bool shouldBeUpdated;
+
+    private bool HasLiked { get; set; }
+
+    private string BtnClass => HasLiked ? "clap-active" : string.Empty;
+
+    protected override void OnParametersSet()
+    {
+	    base.OnParametersSet();
+	    shouldBeUpdated = true;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+	    // As we are using static prerendering, we can only issue JS Interop in OnAfterRender
+	    // As the page might be updated (click a related blog post inside a blog post), we need to update the like status
+	    // But we only want to do this once
+	    if (shouldBeUpdated)
+	    {
+	        HasLiked = await GetHasLiked();
+	        shouldBeUpdated = false;
+	        StateHasChanged();
+	    }
+    }
+
+    private async Task LikeBlogPost()
+    {
+        // Prevent multiple open sites to like / unlike multiple times
+        var hasLikedFromLocalStorage = await GetHasLiked();
+        if (HasLiked != hasLikedFromLocalStorage)
+        {
+            return;
+        }
+
+        HasLiked = !HasLiked;
+        await OnBlogPostLiked.InvokeAsync(HasLiked);
+        await LocalStorage.SetItemAsync($"hasLiked/{BlogPost.Id}", HasLiked);
+    }
+
+    private async Task<bool> GetHasLiked()
+    {
+        if (await LocalStorage.ContainKeyAsync($"hasLiked/{BlogPost.Id}"))
+        {
+            return await LocalStorage.GetItemAsync<bool>($"hasLiked/{BlogPost.Id}");
+        }
+
+        return false;
+    }
+}

@@ -1,0 +1,58 @@
+﻿@using System.IO
+@inject NavigationManager NavigationManager
+
+<HeadContent>
+    <meta name="title" property="og:title" content="@Title" />
+    <link rel="canonical" href="@GetCanoncialUri()" />
+    @if (AbsolutePreviewImageUrl is not null)
+    {
+        <meta name="image" property="og:image" content="@AbsolutePreviewImageUrl"/>
+    }
+    <meta property="og:type" content="article" />
+    <meta property="og:url" content="@NavigationManager.Uri" />
+    @if (Keywords is not null)
+    {
+        <meta name="keywords" content="@Keywords"/>
+    }
+    @if (Description is not null)
+    {
+        <meta name="description" property="og:description" content="@Description" />
+    }
+
+    @if (ChildContent is not null)
+    {
+	    @ChildContent
+    }
+
+</HeadContent>
+@code {
+
+    [Parameter, EditorRequired]
+    public required string Title { get; set; }
+
+    [Parameter]
+    public string? AbsolutePreviewImageUrl { get; set; }
+
+    [Parameter]
+    public string? Description { get; set; }
+
+    [Parameter]
+    public string? Keywords { get; set; }
+
+    [Parameter]
+    public string? CanonicalRelativeUrl { get; set; }
+
+	[Parameter]
+	public RenderFragment? ChildContent { get; set; }
+
+	private string GetCanoncialUri()
+    {
+	    if (!string.IsNullOrEmpty(CanonicalRelativeUrl))
+	    {
+		    return Path.Combine(NavigationManager.BaseUri, CanonicalRelativeUrl);
+	    }
+
+        var uri = new Uri(NavigationManager.Uri);
+        return uri.GetLeftPart(UriPartial.Path);
+    }
+}

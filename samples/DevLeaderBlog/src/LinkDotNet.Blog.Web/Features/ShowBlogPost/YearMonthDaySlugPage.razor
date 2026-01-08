@@ -1,0 +1,112 @@
+@page "/{year:int}/{month:int}/{day:int}/{slug?}"
+@page "/{year:int}/{month:int}/{day:int}/{slug?}/{_?}"
+@using System.Text
+@using Markdig
+@using LinkDotNet.Blog.Domain
+@using LinkDotNet.Blog.Infrastructure.Persistence
+@using LinkDotNet.Blog.Web.Features.Services
+@using LinkDotNet.Blog.Web.Features.ShowBlogPost.Components
+@using LinkDotNet.Blog.Web.Features.SupportMe.Components
+@inject IRepository<BlogPost> BlogPostRepository
+
+@if (isLoading)
+{
+    <Loading></Loading>
+}
+else if (!isLoading && BlogPost is null)
+{
+    <NoBlogPostFound />
+}
+else if (BlogPost is not null)
+{
+    if (BlogPost.IsPublished)
+    {
+        <BlogPostComponent BlogPost="@BlogPost" BlogPostCanonicalUrl="@BlogPostCanonicalUrl" />
+    }
+    else
+    {
+        <AuthorizeView Roles="Admin" Context="AdminContext">
+            <Authorized>
+                <BlogPostComponent BlogPost="@BlogPost" BlogPostCanonicalUrl="@BlogPostCanonicalUrl" />
+            </Authorized>
+            <NotAuthorized>
+                <NoBlogPostFound />
+            </NotAuthorized>
+        </AuthorizeView>
+    }
+}
+
+@code {
+    [Parameter, EditorRequired]
+    public required int Year { get; set; }
+
+    [Parameter, EditorRequired]
+    public required int Month { get; set; }
+
+    [Parameter, EditorRequired]
+    public required int Day { get; set; }
+
+    [Parameter, EditorRequired]
+    public required string Slug { get; set; }
+
+    [Parameter]
+    public required string _ { get; set; }
+
+    private bool isLoading;
+    private string BlogPostCanonicalUrl => $"{Year}/{Month:00}/{Day:00}/{Slug}";
+    private BlogPost? BlogPost { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        isLoading = true;
+
+        var matchingPosts = await BlogPostRepository
+            .GetAllAsync(bp =>
+                   bp.UpdatedDate.Year == Year
+                && bp.UpdatedDate.Month == Month
+                && bp.UpdatedDate.Day == Day)
+            .ConfigureAwait(false);
+
+        if (matchingPosts.Count < 1)
+        {
+            BlogPost = null;
+        }
+        else if (matchingPosts.Count == 1)
+        {
+            BlogPost = matchingPosts[0];
+        }
+        else
+        {
+            if (!string.IsNullOrWhiteSpace(Slug))
+            {
+                BlogPost = matchingPosts.FirstOrDefault(bp => string.Equals(
+                    bp.Slug,
+                    Slug,
+                    StringComparison.OrdinalIgnoreCase));
+            }
+
+            if (BlogPost is null)
+            {
+                var trimmedSlug = Slug.Replace("-", "");
+                var matchingPublishedPosts = matchingPosts
+                    .Where(bp => string.Equals(bp.Slug.Replace("-", ""), trimmedSlug, StringComparison.OrdinalIgnoreCase))
+                    .ToArray();
+                BlogPost = matchingPublishedPosts.Length == 1
+                    ? matchingPublishedPosts[0]
+                    : null;
+            }
+
+            if (BlogPost is null)
+            {
+                var matchingPublishedPosts = matchingPosts
+                    .Where(bp => bp.IsPublished)
+                    .ToArray();
+                BlogPost = matchingPublishedPosts.Length == 1
+                    ? matchingPublishedPosts[0]
+                    : null;
+            }
+        }
+
+	    isLoading = false;
+    }
+}

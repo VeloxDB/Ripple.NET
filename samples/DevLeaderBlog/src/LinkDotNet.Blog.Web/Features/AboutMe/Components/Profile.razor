@@ -1,0 +1,120 @@
+@using LinkDotNet.Blog.Domain
+@using LinkDotNet.Blog.Infrastructure.Persistence
+@using LinkDotNet.Blog.Web.Features.Services
+
+@inject IRepository<ProfileInformationEntry> Repository
+@inject ISortOrderCalculator SortOrderCalculator
+<div class="profile-card">
+    <section id="about-nick-cosentino">
+        <h1>About Nick Cosentino – Dev Leader</h1>
+
+        <div style="text-align:center">
+            <a href="https://linktr.ee/devleader" target="_blank">
+                <img style="width: 400px;"
+                     src="@ProfileInformation.ProfilePictureUrl"
+                     alt="Profile Picture" />
+            </a>
+        </div>
+
+        <p>
+            Nick Cosentino, recognized as <strong><a href="https://linktr.ee/devleader" target="_blank">Dev Leader</a></strong> on social media,
+            is a seasoned software engineer, content creator, and educator with a passion for empowering aspiring developers and
+            professionals alike. With 14+ years of professional experience spanning technical innovation and leadership, Nick
+            specializes in creating actionable content that bridges the gap between technical expertise and career development.
+        </p>
+        <p>
+            As the co-founder of <a href="https://www.brandghost.ai" target="_blank">BrandGhost</a>, Nick helps creators publish Evergreen content
+            effortlessly, enabling them to save time and focus on what truly matters: creating value. Through his expertise in technical blogging,
+            <a href="https://youtube.com/@@devleader" target="_blank">video tutorials</a>, and social media strategy, Nick has become a trusted
+            voice in the tech community, known for his <a href="https://youtube.com/@@codecommute" target="_blank">relatable storytelling</a>
+            and clear, engaging delivery.
+        </p>
+        <p>
+            Nick’s mission is simple: to <a href="/newsletter">inspire and educate developers</a> while promoting healthy, debatable conversations within the tech
+            ecosystem. Whether it's unpacking complex concepts in programming, sharing career progression advice, or teaching soft skills
+            critical to leadership, Nick ensures his audience not only understands but also grows.
+        </p>
+        <p>
+            When Nick isn’t creating technical content or building projects, he’s likely working on
+            <a href="/courses">courses designed to help software engineers</a> excel in their careers. His courses stand out for their
+            focus on practical, real-world applications, with relatable examples and an emphasis on self-improvement.
+        </p>
+        <p>
+            Follow Nick on his platforms for more insights:
+            <ul>
+                <li><a href="https://linktr.ee/devleader" target="_blank">All Nick's Links</a></li>
+                <li><a href="https://youtube.com/@@devleader" target="_blank">Dev Leader YouTube Channel</a></li>
+                <li><a href="https://youtube.com/@@codecommute" target="_blank">Code Commute YouTube Channel</a></li>
+                <li><a href="https://linkedin.com/in/nickcosentino" target="_blank">LinkedIn</a></li>
+            </ul>
+        </p>
+    </section>
+</div>
+
+<ConfirmDialog @ref="Dialog" Content="Do you really want to delete this entry?" Title="Delete"
+OnYesPressed="DeleteItem"></ConfirmDialog>
+
+@code {
+    [Parameter]
+    public bool ShowAdminActions { get; set; }
+
+	[Parameter, EditorRequired]
+	public required ProfileInformation ProfileInformation { get; set; }
+
+    private List<ProfileInformationEntry> profileInformationEntries = [];
+    private ConfirmDialog Dialog { get; set; } = default!;
+    private string? currentDeleteKey;
+    private ProfileInformationEntry? currentDragItem;
+
+    protected override async Task OnInitializedAsync()
+    {
+        profileInformationEntries = (await Repository.GetAllAsync(orderBy: d => d.SortOrder, descending: false)).ToList();
+    }
+
+    private void ShowDeleteDialog(string key)
+    {
+        currentDeleteKey = key;
+        Dialog.Open();
+    }
+
+    private async Task DeleteItem()
+    {
+        var entryToDelete = profileInformationEntries.Single(p => p.Content == currentDeleteKey);
+        profileInformationEntries.Remove(entryToDelete);
+        await Repository.DeleteAsync(entryToDelete.Id);
+    }
+
+    private async Task AddValue(string toAdd)
+    {
+        var sortOrder = GetSortOrder();
+        var newEntry = ProfileInformationEntry.Create(toAdd, sortOrder);
+
+        profileInformationEntries.Add(newEntry);
+        await Repository.StoreAsync(newEntry);
+    }
+
+    private int GetSortOrder()
+    {
+        if (profileInformationEntries.Any())
+        {
+            return profileInformationEntries.Max(p => p.SortOrder) + 1000;
+        }
+
+        return 1000;
+    }
+
+    private async Task HandleDrop(ProfileInformationEntry dropTarget)
+    {
+        if (currentDragItem is null || dropTarget == currentDragItem)
+        {
+            return;
+        }
+
+        var newSortOrder = SortOrderCalculator.GetSortOrder(dropTarget, profileInformationEntries);
+        currentDragItem.SortOrder = newSortOrder;
+        await Repository.StoreAsync(currentDragItem);
+        currentDragItem = null;
+        profileInformationEntries.Sort((a, b) => a.SortOrder.CompareTo(b.SortOrder));
+        StateHasChanged();
+    }
+}

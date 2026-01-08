@@ -1,0 +1,31 @@
+@using LinkDotNet.Blog.Domain
+@using LinkDotNet.Blog.Web.Features.SupportMe.Components
+@inject IOptions<Introduction> Introduction
+@inject IOptions<Social> Social
+@inject IOptions<SupportMeConfiguration> SupportConfiguration
+
+<div style="@IntroductionStyle" class="@IntroductionClass">
+    <div class="introduction-container">
+        <div class="profile-picture" style="--profile-image: url(@Introduction.Value.ProfilePictureUrl)">
+        </div>
+        <div class="profile-text d-flex flex-column">
+            <div>@MarkdownConverter.ToMarkupString(Introduction.Value.Description)</div>
+            @if (SupportConfiguration.Value.ShowUnderIntroduction)
+            {
+                <DonationSection />
+            }
+        </div>
+    </div>
+</div>
+<div class="social-accounts-bar">
+    <SocialAccounts Social="@Social.Value"></SocialAccounts>
+</div>
+@code {
+    private string IntroductionClass => !string.IsNullOrEmpty(Introduction.Value.BackgroundUrl)
+        ? "introduction-background"
+        : string.Empty;
+
+    private string IntroductionStyle => !string.IsNullOrEmpty(Introduction.Value.BackgroundUrl)
+        ? $"--profile-background: url({Introduction.Value.BackgroundUrl})"
+        : string.Empty;
+}

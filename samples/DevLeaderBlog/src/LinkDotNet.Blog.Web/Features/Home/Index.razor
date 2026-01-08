@@ -1,0 +1,101 @@
+@page "/"
+@page "/{page:int}"
+@using Markdig
+@using LinkDotNet.Blog.Domain
+@using LinkDotNet.Blog.Infrastructure
+@using LinkDotNet.Blog.Infrastructure.Persistence
+@using LinkDotNet.Blog.Web.Features.Home.Components
+@using LinkDotNet.Blog.Web.Features.Services
+@using Microsoft.Extensions.Caching.Memory
+@using Microsoft.Extensions.Primitives
+@inject IMemoryCache MemoryCache
+@inject ICacheTokenProvider CacheTokenProvider
+@inject IRepository<BlogPost> BlogPostRepository
+@inject IOptions<Introduction> Introduction
+@inject IOptions<ApplicationConfiguration> AppConfiguration
+@inject NavigationManager NavigationManager
+
+<PageTitle>@AppConfiguration.Value.BlogName</PageTitle>
+
+<OgData Title="@(Markdown.ToPlainText(AppConfiguration.Value.BlogName))"
+        AbsolutePreviewImageUrl="@ImageUrl"
+        Description="@(Markdown.ToPlainText(Introduction.Value.Description))"></OgData>
+<section>
+	<IntroductionCard></IntroductionCard>
+</section>
+
+<section>
+    <div style="text-align: center;">
+        <iframe width="350" height="500" src="https://weekly.devleader.ca/embed" frameborder="0" scrolling="no"></iframe>
+    </div>
+</section>
+
+<CenteredSection Title="Level Up Your Software Engineering">
+    <div>
+        I’m Nick Cosentino, the creator of Dev Leader. I’m a Principal Engineering Manager at Microsoft by day and a software engineering content creator by night! My journey in software engineering and leadership has been fueled by a passion for continuous improvement and a drive to empower teams with trust, transparency, and candor.
+    </div>
+    <br/>
+    <div>
+        Here at Dev Leader, I share insights and experiences from my diverse background, spanning startups, small businesses, and big tech. I’ve been writing code for 20+ years and professionally creating software for 15 years now. I’d love to share my experiences with you!
+    </div>
+</CenteredSection>
+
+<section>
+
+    <header>
+        <div class="text-center pt-2">
+            <h1 class="m-auto align-middle pt-4 pb-3 fw-bold">@(currentPage.IsFirstPage ? "Recent Posts" : "Older Posts")</h1>
+        </div>
+    </header>
+    <div class="content px-4 my-2">
+    @for (var i = 0; i < currentPage.Count; i++)
+    {
+        <ShortBlogPost BlogPost="currentPage[i]" UseAlternativeStyle="@(i % 2 != 0)" LazyLoadPreviewImage="i > 2"></ShortBlogPost>
+    }
+    </div>
+    <BlogPostNavigation PageList="@currentPage"></BlogPostNavigation>
+</section>
+
+@code {
+    [Parameter]
+    public int? Page { get; set; }
+
+    private IPagedList<BlogPost> currentPage = PagedList<BlogPost>.Empty;
+
+    private string ImageUrl => Introduction.Value.ProfilePictureUrl.ToAbsoluteUrl(NavigationManager.BaseUri);
+
+    protected override async Task OnParametersSetAsync()
+    {
+	    const string firstPageCacheKey = "BlogPostList";
+        if (Page is null or < 1)
+        {
+            Page = 1;
+        }
+
+	    // The hot path is that users land on the initial page which is the first page.
+	    // So we want to cache that page for a while to reduce the load on the database
+	    // and to speed up the page load.
+		// That will lead to stale blog posts for x minutes (worst case) for the first page,
+		// but I am fine with that (as publishing isn't super critical and not done multiple times per hour).
+		// This cache can be manually invalidated in the Admin UI (settings)
+	    if (Page == 1)
+	    {
+		    currentPage = (await MemoryCache.GetOrCreateAsync(firstPageCacheKey, async entry =>
+		    {
+			    var cacheDuration = TimeSpan.FromMinutes(AppConfiguration.Value.FirstPageCacheDurationInMinutes);
+			    entry.AbsoluteExpirationRelativeToNow = cacheDuration;
+			    entry.AddExpirationToken(new CancellationChangeToken(CacheTokenProvider.Token));
+			    return await GetAllForPageAsync(1);
+		    }))!;
+		    return;
+	    }
+
+        currentPage = await GetAllForPageAsync(Page.Value);
+    }
+
+	private ValueTask<IPagedList<BlogPost>> GetAllForPageAsync(int page)
+		=> BlogPostRepository.GetAllAsync(
+		p => p.IsPublished,
+		b => b.UpdatedDate,
+		page: page, pageSize: AppConfiguration.Value.BlogPostsPerPage);
+}

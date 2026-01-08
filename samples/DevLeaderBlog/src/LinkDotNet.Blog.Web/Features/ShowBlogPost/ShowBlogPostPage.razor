@@ -1,0 +1,55 @@
+@page "/blogPost/{blogPostId}/{slug?}"
+@using System.Text
+@using Markdig
+@using LinkDotNet.Blog.Domain
+@using LinkDotNet.Blog.Infrastructure.Persistence
+@using LinkDotNet.Blog.Web.Features.Services
+@using LinkDotNet.Blog.Web.Features.ShowBlogPost.Components
+@inject IRepository<BlogPost> BlogPostRepository
+
+@if (isLoading)
+{
+    <Loading></Loading>
+}
+else if (!isLoading && BlogPost is null)
+{
+    <ObjectNotFound></ObjectNotFound>
+}
+else if (BlogPost is not null)
+{
+    if (BlogPost.IsPublished)
+    {
+        <BlogPostComponent BlogPost="@BlogPost" BlogPostCanonicalUrl="@BlogPostCanonicalUrl" />
+    }
+    else
+    {
+        <AuthorizeView Roles="Admin" Context="AdminContext">
+            <Authorized>
+                <BlogPostComponent BlogPost="@BlogPost" BlogPostCanonicalUrl="@BlogPostCanonicalUrl" />
+            </Authorized>
+            <NotAuthorized>
+                <NoBlogPostFound />
+            </NotAuthorized>
+        </AuthorizeView>
+    }
+}
+
+@code {
+    [Parameter, EditorRequired]
+    public required string BlogPostId { get; set; }
+
+    [Parameter]
+    public string? Slug { get; set; }
+
+    private bool isLoading;
+
+	private string BlogPostCanonicalUrl => $"blogPost/{BlogPost?.Id}";
+	private BlogPost? BlogPost { get; set; }
+
+	protected override async Task OnParametersSetAsync()
+    {
+	    isLoading = true;
+	    BlogPost = await BlogPostRepository.GetByIdAsync(BlogPostId);
+	    isLoading = false;
+    }
+}

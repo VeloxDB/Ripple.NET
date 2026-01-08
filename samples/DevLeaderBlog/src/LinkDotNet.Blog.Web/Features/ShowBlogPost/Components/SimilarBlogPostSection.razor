@@ -1,0 +1,50 @@
+@using LinkDotNet.Blog.Domain
+@using LinkDotNet.Blog.Infrastructure.Persistence
+@inject IRepository<BlogPost> BlogPostRepository
+@inject IRepository<SimilarBlogPost> SimilarBlogPostJobRepository
+
+@if (similarBlogPosts.Count > 0)
+{
+	<div class="accordion my-5" id="similarBlogPosts">
+		<div class="accordion-item">
+			<h2 class="accordion-header" id="similar-post-header">
+				<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#similiar-post-body" aria-expanded="false" aria-controls="similiar-post-body">
+					Want to read more? Check out these related blog posts!
+				</button>
+			</h2>
+			<div id="similiar-post-body" class="accordion-collapse collapse" aria-labelledby="similar-post-header">
+				<div class="row p-4">
+					@foreach (var relatedBlogPost in similarBlogPosts)
+					{
+						<div class="col-12 col-md-4 pt-2">
+							<div class="card h-100">
+								<div class="card-body">
+									<h5 class="card-title fw-bold">@relatedBlogPost.Title</h5>
+									<p class="card-text">@MarkdownConverter.ToMarkupString(relatedBlogPost.ShortDescription)</p>
+								</div>
+								<a href="blogPost/@relatedBlogPost.Id/@relatedBlogPost.Slug" class="stretched-link"></a>
+							</div>
+						</div>
+					}
+				</div>
+			</div>
+		</div>
+	</div>
+}
+
+@code {
+	[Parameter, EditorRequired]
+    public required BlogPost BlogPost { get; set; }
+
+	private IReadOnlyCollection<BlogPost> similarBlogPosts = [];
+
+	protected override async Task OnParametersSetAsync()
+	{
+		var similarBlogPostIds = await SimilarBlogPostJobRepository.GetByIdAsync(BlogPost.Id);
+		if (similarBlogPostIds is not null)
+		{
+			similarBlogPosts = await BlogPostRepository.GetAllAsync(
+				b => similarBlogPostIds.SimilarBlogPostIds.Contains(b.Id));
+		}
+	}
+}
