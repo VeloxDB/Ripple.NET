@@ -6,99 +6,22 @@ using Microsoft.EntityFrameworkCore.Diagnostics;
 
 namespace Ripple.NET;
 
-internal class DBLineage
-{
-	private List<Transaction> transactions = new List<Transaction>();
-	private Stack<TransactionBuilder> transactionStack = new Stack<TransactionBuilder>();
-
-	private List<string> commandTexts = new List<string>();
-
-	public string? Name { get; private set; }
-
-	public DBLineage(string? name)
-	{
-		Name = name;
-	}
-
-	public void StartTransaction()
-	{
-		commandTexts.Add("---- Start Transaction ----");
-		transactionStack.Push(new TransactionBuilder());
-	}
-
-	public void EndTransaction()
-	{
-		commandTexts.Add("---- End Transaction ----");
-		if (transactionStack.Count == 0)
-		{
-			throw new InvalidOperationException("No active transaction to end.");
-		}
-
-		var builder = transactionStack.Pop();
-		var transaction = builder.Build();
-
-		if (transactionStack.Count == 0)
-		{
-			transactions.Add(transaction);
-		}
-		else
-		{
-			transactionStack.Peek().AddChild(transaction);
-		}
-	}
-
-	public void RecordRead(IReadOnlyCollection<string> types)
-	{
-		if (transactionStack.Count == 0)
-		{
-			transactions.Add(new Transaction(types, Array.Empty<string>(), null));
-		}
-		else
-		{
-			transactionStack.Peek().RecordRead(types);
-		}
-	}
-
-	public void RecordWrite(IReadOnlyCollection<string> types)
-	{
-		if (transactionStack.Count == 0)
-		{
-			transactions.Add(new Transaction(Array.Empty<string>(), types, null));
-		}
-		else
-		{
-			transactionStack.Peek().RecordWrite(types);
-		}
-	}
-
-	public Transaction[] GetTransactions()
-	{
-		return [.. transactions];
-	}
-
-	public string[] GetCommands()
-	{
-		return [.. commandTexts];
-	}
-
-	public void RecordCommand(string commandText)
-	{
-		commandTexts.Add(commandText);
-	}
-}
-
 
 internal class Interceptor
 {
 	AsyncLocal<DBLineage> dbLineage = new AsyncLocal<DBLineage>();
 
-	private DBLineage DbLineageInstance
+	private readonly RippleQueryExpressionInterceptor queryInterceptor;
+	private readonly RippleDBCommandInterceptor commandInterceptor;
+	private readonly RippleDBTransactionInterceptor transactionInterceptor;
+	private readonly RippleDBSaveChangesInterceptor saveChangesInterceptor;
+
+	public Interceptor()
 	{
-		get
-		{
-			Debug.Assert(dbLineage.Value != null, "dbLineage AsyncLocal is null");
-			return dbLineage.Value;
-		}
+		queryInterceptor = new RippleQueryExpressionInterceptor();
+		commandInterceptor = new RippleDBCommandInterceptor(queryInterceptor, this);
+		transactionInterceptor = new RippleDBTransactionInterceptor(this);
+		saveChangesInterceptor = new RippleDBSaveChangesInterceptor(this);
 	}
 
 	public void StartAPICall(Endpoint endpoint)
@@ -108,8 +31,8 @@ internal class Interceptor
 
 	public APICall? EndAPICall()
 	{
-		var dbLineage = DbLineageInstance;
-		if (dbLineage.Name == null)
+		var dbLineage = this.dbLineage.Value;
+		if (dbLineage == null || dbLineage.Name == null)
 		{
 			return null;
 		}
@@ -268,30 +191,29 @@ internal class Interceptor
 
 	private void RecordRead(IReadOnlyCollection<string> types)
 	{
-		DbLineageInstance.RecordRead(types);
+		dbLineage.Value?.RecordRead(types);
 	}
 	private void RecordWrite(IReadOnlyCollection<string> types)
 	{
-		DbLineageInstance.RecordWrite(types);
+		dbLineage.Value?.RecordWrite(types);
 	}
 
 	private void EndTransaction()
 	{
-		DbLineageInstance.EndTransaction();
+		dbLineage.Value?.EndTransaction();
 	}
 
 	private void StartTransaction()
 	{
-		DbLineageInstance.StartTransaction();
+		dbLineage.Value?.StartTransaction();
 	}
-
+	
 	public void Register(DbContextOptionsBuilder optionsBuilder)
 	{
-		var queryInterceptor = new RippleQueryExpressionInterceptor();
 		optionsBuilder.AddInterceptors(
-			new RippleDBCommandInterceptor(queryInterceptor, this),
-			new RippleDBTransactionInterceptor(this),
-			new RippleDBSaveChangesInterceptor(this),
+			commandInterceptor,
+			transactionInterceptor,
+			saveChangesInterceptor,
 			queryInterceptor
 		);
 	}
