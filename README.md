@@ -21,6 +21,10 @@ Ripple.NET is currently in an early experimental phase. Please be aware of the f
 
  * Provider Support: Initial focus is on Relational providers. 
 
+ * Only APIs, we do not currently support Blazor applications.
+
+ * We do not track database access from middleware
+
 ## **Requirements**
 
 * **Runtime**: .NET 10.0
@@ -77,7 +81,7 @@ http:\/\/localhost:\<port\>/ripple
 
 ## **Contributing**
 
-We welcome contributions! Please check out the [Discussions](https://github.com/VeloxDB/Ripple.NET/discussions) tab to see where you can help.
+We welcome contributions! Please check out the [TODO.md] or [Discussions](https://github.com/VeloxDB/Ripple.NET/discussions) tab to see where you can help.
 
 ## **License**
 
