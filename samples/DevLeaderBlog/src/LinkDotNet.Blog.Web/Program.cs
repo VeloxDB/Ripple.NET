@@ -80,7 +80,7 @@ public class Program
         if (app.Environment.IsDevelopment())
         {
             app.UseDeveloperExceptionPage();
-            app.UseRipple();
+            app.MapRippleDashboard();
         }
         else
         {
@@ -97,8 +97,17 @@ public class Program
             ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse,
         })
         .RequireAuthorization();
-
+        app.Use(async (context, next) =>
+        {
+            var task = next();
+            await task;
+        });
         app.UseRouting();
+
+        if( app.Environment.IsDevelopment())
+        {
+            app.UseRippleAPIInterceptor();
+        }
 
         app.UseUserCulture();
 
@@ -112,7 +121,8 @@ public class Program
         app.MapFallbackToPage("/tags/{tag}", "/_Host");
         app.MapFallbackToPage("/search/{searchTerm}", "/_Host");
 
-        app.MapGet("/sitemap.xml", async (IMemoryCache cache, ISitemapService siteMapService, HttpContext context, CancellationToken ct) => {
+        app.MapGet("/sitemap.xml", async (IMemoryCache cache, ISitemapService siteMapService, HttpContext context, CancellationToken ct) =>
+        {
             var sitemap = await cache.GetOrCreateAsync("sitemap.xml", async entry =>
             {
                 entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(24);
@@ -133,5 +143,7 @@ public class Program
 
             return Results.Extensions.Xml(sitemap);
         });
+
+
     }
 }

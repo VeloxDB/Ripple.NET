@@ -20,7 +20,7 @@ public static class SqlRegistrationExtensions
             var connectionString = configuration.Value.ConnectionString;
             builder.UseSqlServer(connectionString)
 #if DEBUG
-                .UseRipple()
+                .UseRippleDbInterceptor()
                 .EnableDetailedErrors()
 #endif
                 ;
@@ -40,7 +40,7 @@ public static class SqlRegistrationExtensions
             var connectionString = configuration.Value.ConnectionString;
             builder.UseSqlite(connectionString)
 #if DEBUG
-                .UseRipple()
+                .UseRippleDbInterceptor()
                 .EnableDetailedErrors()
 #endif
                 ;
@@ -63,7 +63,7 @@ public static class SqlRegistrationExtensions
                 mySqlOptions.TranslateParameterizedCollectionsToConstants();
             })
 #if DEBUG
-                .UseRipple()
+                .UseRippleDbInterceptor()
                 .EnableDetailedErrors()
 #endif
                 ;
