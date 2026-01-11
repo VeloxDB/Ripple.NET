@@ -30,7 +30,7 @@ public static class RippleExtensions
         return services;
     }
 
-    public static IApplicationBuilder UseRipple(this IApplicationBuilder app)
+    public static IApplicationBuilder MapRippleDashboard(this IApplicationBuilder app)
     {
         app.Map("/ripple", builder =>
         {
@@ -115,6 +115,11 @@ public static class RippleExtensions
                 });
             });
         });
+        return app;
+    }
+
+    public static IApplicationBuilder UseRippleAPIInterceptor(this IApplicationBuilder app)
+    {
         app.Use(async (context, next) =>
         {
             RippleService service = context.RequestServices.GetRequiredService<RippleService>();
@@ -146,7 +151,7 @@ public static class RippleExtensions
     }
     #endif
 
-    public static DbContextOptionsBuilder UseRipple(
+    public static DbContextOptionsBuilder UseRippleDbInterceptor(
         this DbContextOptionsBuilder optionsBuilder)
     {
         var serviceProvider = optionsBuilder.Options.GetExtension<CoreOptionsExtension>()?.ApplicationServiceProvider;

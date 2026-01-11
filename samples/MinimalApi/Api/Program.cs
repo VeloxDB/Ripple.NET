@@ -10,7 +10,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRipple();
 builder.Services.AddOpenApi(); // Built-in OpenAPI support
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlite("Data Source=app.db").UseRipple());
+    options.UseSqlite("Data Source=app.db").UseRippleDbInterceptor());
 
 var app = builder.Build();
 
@@ -20,7 +20,8 @@ if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi(); // Expose openapi.json
     app.MapScalarApiReference(); // Expose Scalar UI at /scalar/v1
-    app.UseRipple();
+    app.MapRippleDashboard();
+    app.UseRippleAPIInterceptor();
 }
 
 // Ensure database is created

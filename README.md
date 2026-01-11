@@ -64,19 +64,28 @@ Enable the Ripple interceptor on your database context:
 ```cs
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlite("Data Source=app.db")
-           .UseRipple());
+           .UseRippleDbInterceptor());
 ```
-### **3\. Enable Middleware**
+### **3\. Enable Ripple Dashboard**
 
-Register the Ripple middleware in your request pipeline:
+Register the Ripple dashboard in your request pipeline:
 
 ```cs
 var app = builder.Build();
 
-app.UseRipple();
+app.MapRippleDashboard(); // should go before UseRouting()
 ```
 
-### **4\. Analyze Data**
+### **4. Enable Ripple API interception**
+
+Register Ripple interception middleware in your request pipeline:
+
+```cs
+app.UseRouting();
+app.UseRippleDbInterceptor(); // should go after UseRouting() (if used)
+```
+
+### **5\. Analyze Data**
 
 Run your application and perform some API requests. Then, navigate to:
 http:\/\/localhost:\<port\>/ripple
