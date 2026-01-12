@@ -3,6 +3,8 @@
 **Ripple.NET** is a powerful diagnostic tool designed for ASP.NET Core and Entity Framework (EF) applications. It helps developers identify database anomalies caused by improper transaction scoping or weak isolation levels.  
 Inspired by the research in the Stanford [ACIDRain paper](https://dl.acm.org/doi/pdf/10.1145/3035918.3064037), Ripple.NET provides visibility into the "concurrency gaps" that often lead to data corruption or business logic errors.
 
+https://github.com/user-attachments/assets/8708f9b0-ea05-4bf8-8a93-2c6e09e14076
+
 ## **Features**
 
 * **Automatic API Tracking**: Automatically monitors all incoming API calls.
