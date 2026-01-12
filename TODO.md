@@ -1,4 +1,8 @@
-Unknown requests - Would be nice if it could track database interactions not originating from API calls (like cron jobs, middleware etc)
-Blazor support
-Better UX and integration with pipeline
-Blacklist filter, filter out requests by URI
+- [ ] Unknown requests – Track database interactions not originating from API calls (e.g., cron jobs, middleware, etc.).
+- [ ] Blazor support.
+- [ ] Better data access detection – Move from table-wide to column-wide detection (this likely requires SQL parsing instead of LINQ expression parsing).
+- [ ] Better conflict detection – Prune specific edges in the Abstract History Graph (may require SQL parsing).
+- [ ] Isolation level awareness/understanding.
+- [ ] Improved UX and CI/CD pipeline integration.
+- [ ] Blacklist filter – Ability to filter out requests by URI.
+- [ ] Dapper support.
