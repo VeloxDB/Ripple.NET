@@ -52,7 +52,7 @@ builder.Services.AddTransient<IWishlistService, WishlistDataAccessLayer>();
 builder.Services.AddRipple();
 
 builder.Services.AddDbContext<BookDBContext>(options =>
-options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")).UseRipple());
+options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")).UseRippleDbInterceptor());
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 .AddJwtBearer(options =>
@@ -90,11 +90,12 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-app.UseRipple();
+app.MapRippleDashboard();
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
 
+app.UseRippleAPIInterceptor();
 app.UseSwagger();
 app.UseSwaggerUI(options =>
 {
