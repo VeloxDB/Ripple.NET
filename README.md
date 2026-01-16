@@ -66,23 +66,45 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlite("Data Source=app.db")
            .UseRippleDbInterceptor());
 ```
-### **3\. Enable Ripple Dashboard**
 
-Register the Ripple dashboard in your request pipeline:
+### **3. Enable Ripple Dashboard & Interceptor**
 
-```cs
+Register the Ripple dashboard and middleware in your request pipeline. Order matters:
+
+```csharp
 var app = builder.Build();
 
-app.MapRippleDashboard(); // should go before UseRouting()
+app.MapRippleDashboard();      // Should go early in the pipeline
+app.UseRouting();
+app.UseRippleAPIInterceptor(); // Should go after UseRouting()
+
 ```
 
-### **4. Enable Ripple API interception**
+### **4. SPA Proxy Configuration**
 
-Register Ripple interception middleware in your request pipeline:
+If you are using a SPA template (Angular, React, or Vue with Vite), the frontend development server often intercepts requests. If your dashboard at `/ripple` returns a 404 or a blank page, you must tell your frontend proxy to forward the request to the backend.
 
-```cs
-app.UseRouting();
-app.UseRippleDbInterceptor(); // should go after UseRouting() (if used)
+**For Angular (`proxy.conf.js`):**
+
+```javascript
+{
+  "/ripple": {
+    "target": "https://localhost:7000", // Your Kestrel Port
+    "secure": false
+  }
+}
+
+```
+
+**For Vite (`vite.config.ts`):**
+
+```typescript
+server: {
+  proxy: {
+    '^/ripple': { target: 'https://localhost:7000', secure: false }
+  }
+}
+
 ```
 
 ### **5\. Analyze Data**
