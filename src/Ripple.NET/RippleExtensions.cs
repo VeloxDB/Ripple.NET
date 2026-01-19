@@ -89,7 +89,9 @@ public static class RippleExtensions
                         Converters = { new APICallConverter(), new TransactionConverter() }
                     };
 
-                    var apiCalls = await JsonSerializer.DeserializeAsync<KeyValuePair<string, List<APICall>>[]>(stream, options);
+                    string json = await new StreamReader(stream).ReadToEndAsync();
+
+                    var apiCalls =  JsonSerializer.Deserialize<KeyValuePair<string, List<APICall>>[]>(json, options);
 
                     if (apiCalls != null)
                     {
