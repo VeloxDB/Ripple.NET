@@ -15,7 +15,37 @@
 					}
 				],
 				"commands": [
-					"-- Ripple1319389179:[1]\n\nSELECT [c].[CategoryID], [c].[CategoryName]\nFROM [Categories] AS [c]"
+					"-- Ripple1313127786:[2]\n\nSELECT [c].[CategoryID], [c].[CategoryName]\nFROM [Categories] AS [c]"
+				],
+				"readOnly": true,
+				"hasTransactions": true
+			}
+		]
+	},
+	{
+		"key": "BookCart.Controllers.BookController.Delete (BookCart)",
+		"value": [
+			{
+				"name": "BookCart.Controllers.BookController.Delete (BookCart)",
+				"transactions": [
+					{
+						"children": [],
+						"readTypes": [
+							"BookCart.Models.Book"
+						],
+						"writeTypes": [],
+						"readOnly": true
+					},
+					{
+						"children": [],
+						"readTypes": [],
+						"writeTypes": [],
+						"readOnly": true
+					}
+				],
+				"commands": [
+					"-- Ripple1313127786:[21]\n\nSELECT TOP(1) [b].[BookID], [b].[Author], [b].[Category], [b].[CoverFileName], [b].[Price], [b].[Title]\nFROM [Book] AS [b]\nWHERE [b].[BookID] = @__p_0",
+					"SET IMPLICIT_TRANSACTIONS OFF;\nSET NOCOUNT ON;\nDELETE FROM [Book]\nOUTPUT 1\nWHERE [BookID] = @p0;\n"
 				],
 				"readOnly": true,
 				"hasTransactions": true
@@ -38,9 +68,97 @@
 					}
 				],
 				"commands": [
-					"-- Ripple1319389179:[0]\n\nSELECT [b].[BookID], [b].[Author], [b].[Category], [b].[CoverFileName], [b].[Price], [b].[Title]\nFROM [Book] AS [b]"
+					"-- Ripple1313127786:[0]\n\nSELECT [b].[BookID], [b].[Author], [b].[Category], [b].[CoverFileName], [b].[Price], [b].[Title]\nFROM [Book] AS [b]"
 				],
 				"readOnly": true,
+				"hasTransactions": true
+			}
+		]
+	},
+	{
+		"key": "BookCart.Controllers.BookController.Post (BookCart)",
+		"value": [
+			{
+				"name": "BookCart.Controllers.BookController.Post (BookCart)",
+				"transactions": [
+					{
+						"children": [],
+						"readTypes": [],
+						"writeTypes": [
+							"BookCart.Models.Book"
+						],
+						"readOnly": false
+					}
+				],
+				"commands": [
+					"SET IMPLICIT_TRANSACTIONS OFF;\nSET NOCOUNT ON;\nINSERT INTO [Book] ([Author], [Category], [CoverFileName], [Price], [Title])\nOUTPUT INSERTED.[BookID]\nVALUES (@p0, @p1, @p2, @p3, @p4);\n"
+				],
+				"readOnly": false,
+				"hasTransactions": true
+			}
+		]
+	},
+	{
+		"key": "BookCart.Controllers.BookController.SimilarBooks (BookCart)",
+		"value": [
+			{
+				"name": "BookCart.Controllers.BookController.SimilarBooks (BookCart)",
+				"transactions": [
+					{
+						"children": [],
+						"readTypes": [
+							"BookCart.Models.Book"
+						],
+						"writeTypes": [],
+						"readOnly": true
+					},
+					{
+						"children": [],
+						"readTypes": [
+							"BookCart.Models.Book"
+						],
+						"writeTypes": [],
+						"readOnly": true
+					}
+				],
+				"commands": [
+					"-- Ripple1313127786:[9]\n\nSELECT TOP(1) [b].[BookID], [b].[Author], [b].[Category], [b].[CoverFileName], [b].[Price], [b].[Title]\nFROM [Book] AS [b]\nWHERE [b].[BookID] = @__bookId_0",
+					"-- Ripple1313127786:[22]\n\nSELECT TOP(@__p_2) [b].[BookID], [b].[Author], [b].[Category], [b].[CoverFileName], [b].[Price], [b].[Title]\nFROM [Book] AS [b]\nWHERE [b].[Category] = @__book_Category_0 AND [b].[BookID] <> @__book_BookId_1\nORDER BY NEWID()"
+				],
+				"readOnly": true,
+				"hasTransactions": true
+			}
+		]
+	},
+	{
+		"key": "BookCart.Controllers.CheckOutController.Post (BookCart)",
+		"value": [
+			{
+				"name": "BookCart.Controllers.CheckOutController.Post (BookCart)",
+				"transactions": [
+					{
+						"children": [],
+						"readTypes": [],
+						"writeTypes": [
+							"BookCart.Models.CustomerOrders"
+						],
+						"readOnly": false
+					},
+					{
+						"children": [],
+						"readTypes": [],
+						"writeTypes": [
+							"BookCart.Models.CustomerOrders",
+							"BookCart.Models.CustomerOrderDetails"
+						],
+						"readOnly": false
+					}
+				],
+				"commands": [
+					"SET IMPLICIT_TRANSACTIONS OFF;\nSET NOCOUNT ON;\nINSERT INTO [CustomerOrders] ([OrderId], [CartTotal], [DateCreated], [UserID])\nVALUES (@p0, @p1, @p2, @p3);\n",
+					"SET IMPLICIT_TRANSACTIONS OFF;\nSET NOCOUNT ON;\nINSERT INTO [CustomerOrderDetails] ([OrderId], [Price], [ProductId], [Quantity])\nOUTPUT INSERTED.[OrderDetailsId]\nVALUES (@p0, @p1, @p2, @p3);\n"
+				],
+				"readOnly": false,
 				"hasTransactions": true
 			}
 		]
@@ -61,7 +179,7 @@
 					}
 				],
 				"commands": [
-					"-- Ripple1319389179:[3]\n\nSELECT TOP(1) [u].[UserID], [u].[FirstName], [u].[Gender], [u].[LastName], [u].[Password], [u].[UserTypeID], [u].[Username]\nFROM [UserMaster] AS [u]\nWHERE [u].[Username] = @__loginCredentials_Username_0 AND [u].[Password] = @__loginCredentials_Password_1"
+					"-- Ripple1313127786:[7]\n\nSELECT TOP(1) [u].[UserID], [u].[FirstName], [u].[Gender], [u].[LastName], [u].[Password], [u].[UserTypeID], [u].[Username]\nFROM [UserMaster] AS [u]\nWHERE [u].[Username] = @__loginCredentials_Username_0 AND [u].[Password] = @__loginCredentials_Password_1"
 				],
 				"readOnly": true,
 				"hasTransactions": true
@@ -81,10 +199,91 @@
 						],
 						"writeTypes": [],
 						"readOnly": true
+					},
+					{
+						"children": [],
+						"readTypes": [
+							"BookCart.Models.CustomerOrders"
+						],
+						"writeTypes": [],
+						"readOnly": true
+					},
+					{
+						"children": [],
+						"readTypes": [
+							"BookCart.Models.CustomerOrderDetails"
+						],
+						"writeTypes": [],
+						"readOnly": true
+					},
+					{
+						"children": [],
+						"readTypes": [
+							"BookCart.Models.CustomerOrders"
+						],
+						"writeTypes": [],
+						"readOnly": true
+					},
+					{
+						"children": [],
+						"readTypes": [
+							"BookCart.Models.CustomerOrderDetails"
+						],
+						"writeTypes": [],
+						"readOnly": true
+					},
+					{
+						"children": [],
+						"readTypes": [
+							"BookCart.Models.Book"
+						],
+						"writeTypes": [],
+						"readOnly": true
+					},
+					{
+						"children": [],
+						"readTypes": [
+							"BookCart.Models.CustomerOrders"
+						],
+						"writeTypes": [],
+						"readOnly": true
+					},
+					{
+						"children": [],
+						"readTypes": [
+							"BookCart.Models.CustomerOrderDetails"
+						],
+						"writeTypes": [],
+						"readOnly": true
+					},
+					{
+						"children": [],
+						"readTypes": [
+							"BookCart.Models.CustomerOrders"
+						],
+						"writeTypes": [],
+						"readOnly": true
+					},
+					{
+						"children": [],
+						"readTypes": [
+							"BookCart.Models.CustomerOrderDetails"
+						],
+						"writeTypes": [],
+						"readOnly": true
 					}
 				],
 				"commands": [
-					"-- Ripple1319389179:[9]\n\nSELECT [c].[OrderId]\nFROM [CustomerOrders] AS [c]\nWHERE [c].[UserID] = @__userId_0"
+					"-- Ripple1313127786:[11]\n\nSELECT [c].[OrderId]\nFROM [CustomerOrders] AS [c]\nWHERE [c].[UserID] = @__userId_0",
+					"-- Ripple1313127786:[12]\n\nSELECT TOP(1) [c].[OrderId], [c].[CartTotal], [c].[DateCreated], [c].[UserID]\nFROM [CustomerOrders] AS [c]\nWHERE [c].[OrderId] = @__orderid_0",
+					"-- Ripple1313127786:[13]\n\nSELECT [c].[OrderDetailsId], [c].[OrderId], [c].[Price], [c].[ProductId], [c].[Quantity]\nFROM [CustomerOrderDetails] AS [c]\nWHERE [c].[OrderId] = @__orderid_0",
+					"-- Ripple1313127786:[12]\n\nSELECT TOP(1) [c].[OrderId], [c].[CartTotal], [c].[DateCreated], [c].[UserID]\nFROM [CustomerOrders] AS [c]\nWHERE [c].[OrderId] = @__orderid_0",
+					"-- Ripple1313127786:[13]\n\nSELECT [c].[OrderDetailsId], [c].[OrderId], [c].[Price], [c].[ProductId], [c].[Quantity]\nFROM [CustomerOrderDetails] AS [c]\nWHERE [c].[OrderId] = @__orderid_0",
+					"-- Ripple1313127786:[14]\n\nSELECT TOP(1) [b].[BookID], [b].[Author], [b].[Category], [b].[CoverFileName], [b].[Price], [b].[Title]\nFROM [Book] AS [b]\nWHERE [b].[BookID] = @__customerOrderDetail_ProductId_0",
+					"-- Ripple1313127786:[12]\n\nSELECT TOP(1) [c].[OrderId], [c].[CartTotal], [c].[DateCreated], [c].[UserID]\nFROM [CustomerOrders] AS [c]\nWHERE [c].[OrderId] = @__orderid_0",
+					"-- Ripple1313127786:[13]\n\nSELECT [c].[OrderDetailsId], [c].[OrderId], [c].[Price], [c].[ProductId], [c].[Quantity]\nFROM [CustomerOrderDetails] AS [c]\nWHERE [c].[OrderId] = @__orderid_0",
+					"-- Ripple1313127786:[12]\n\nSELECT TOP(1) [c].[OrderId], [c].[CartTotal], [c].[DateCreated], [c].[UserID]\nFROM [CustomerOrders] AS [c]\nWHERE [c].[OrderId] = @__orderid_0",
+					"-- Ripple1313127786:[13]\n\nSELECT [c].[OrderDetailsId], [c].[OrderId], [c].[Price], [c].[ProductId], [c].[Quantity]\nFROM [CustomerOrderDetails] AS [c]\nWHERE [c].[OrderId] = @__orderid_0"
 				],
 				"readOnly": true,
 				"hasTransactions": true
@@ -115,12 +314,822 @@
 						],
 						"writeTypes": [],
 						"readOnly": true
+					},
+					{
+						"children": [],
+						"readTypes": [
+							"BookCart.Models.CustomerOrders"
+						],
+						"writeTypes": [],
+						"readOnly": true
+					},
+					{
+						"children": [],
+						"readTypes": [
+							"BookCart.Models.CustomerOrderDetails"
+						],
+						"writeTypes": [],
+						"readOnly": true
+					},
+					{
+						"children": [],
+						"readTypes": [
+							"BookCart.Models.Book"
+						],
+						"writeTypes": [],
+						"readOnly": true
+					},
+					{
+						"children": [],
+						"readTypes": [
+							"BookCart.Models.CustomerOrders"
+						],
+						"writeTypes": [],
+						"readOnly": true
+					},
+					{
+						"children": [],
+						"readTypes": [
+							"BookCart.Models.CustomerOrderDetails"
+						],
+						"writeTypes": [],
+						"readOnly": true
+					},
+					{
+						"children": [],
+						"readTypes": [
+							"BookCart.Models.CustomerOrders"
+						],
+						"writeTypes": [],
+						"readOnly": true
+					},
+					{
+						"children": [],
+						"readTypes": [
+							"BookCart.Models.CustomerOrderDetails"
+						],
+						"writeTypes": [],
+						"readOnly": true
+					},
+					{
+						"children": [],
+						"readTypes": [
+							"BookCart.Models.CustomerOrders"
+						],
+						"writeTypes": [],
+						"readOnly": true
+					},
+					{
+						"children": [],
+						"readTypes": [
+							"BookCart.Models.CustomerOrderDetails"
+						],
+						"writeTypes": [],
+						"readOnly": true
 					}
 				],
 				"commands": [
-					"-- Ripple1319389179:[9]\n\nSELECT [c].[OrderId]\nFROM [CustomerOrders] AS [c]\nWHERE [c].[UserID] = @__userId_0",
-					"-- Ripple1319389179:[16]\n\nSELECT TOP(1) [c].[OrderId], [c].[CartTotal], [c].[DateCreated], [c].[UserID]\nFROM [CustomerOrders] AS [c]\nWHERE [c].[OrderId] = @__orderid_0",
-					"-- Ripple1319389179:[17]\n\nSELECT [c].[OrderDetailsId], [c].[OrderId], [c].[Price], [c].[ProductId], [c].[Quantity]\nFROM [CustomerOrderDetails] AS [c]\nWHERE [c].[OrderId] = @__orderid_0"
+					"-- Ripple1313127786:[11]\n\nSELECT [c].[OrderId]\nFROM [CustomerOrders] AS [c]\nWHERE [c].[UserID] = @__userId_0",
+					"-- Ripple1313127786:[12]\n\nSELECT TOP(1) [c].[OrderId], [c].[CartTotal], [c].[DateCreated], [c].[UserID]\nFROM [CustomerOrders] AS [c]\nWHERE [c].[OrderId] = @__orderid_0",
+					"-- Ripple1313127786:[13]\n\nSELECT [c].[OrderDetailsId], [c].[OrderId], [c].[Price], [c].[ProductId], [c].[Quantity]\nFROM [CustomerOrderDetails] AS [c]\nWHERE [c].[OrderId] = @__orderid_0",
+					"-- Ripple1313127786:[12]\n\nSELECT TOP(1) [c].[OrderId], [c].[CartTotal], [c].[DateCreated], [c].[UserID]\nFROM [CustomerOrders] AS [c]\nWHERE [c].[OrderId] = @__orderid_0",
+					"-- Ripple1313127786:[13]\n\nSELECT [c].[OrderDetailsId], [c].[OrderId], [c].[Price], [c].[ProductId], [c].[Quantity]\nFROM [CustomerOrderDetails] AS [c]\nWHERE [c].[OrderId] = @__orderid_0",
+					"-- Ripple1313127786:[14]\n\nSELECT TOP(1) [b].[BookID], [b].[Author], [b].[Category], [b].[CoverFileName], [b].[Price], [b].[Title]\nFROM [Book] AS [b]\nWHERE [b].[BookID] = @__customerOrderDetail_ProductId_0",
+					"-- Ripple1313127786:[12]\n\nSELECT TOP(1) [c].[OrderId], [c].[CartTotal], [c].[DateCreated], [c].[UserID]\nFROM [CustomerOrders] AS [c]\nWHERE [c].[OrderId] = @__orderid_0",
+					"-- Ripple1313127786:[13]\n\nSELECT [c].[OrderDetailsId], [c].[OrderId], [c].[Price], [c].[ProductId], [c].[Quantity]\nFROM [CustomerOrderDetails] AS [c]\nWHERE [c].[OrderId] = @__orderid_0",
+					"-- Ripple1313127786:[12]\n\nSELECT TOP(1) [c].[OrderId], [c].[CartTotal], [c].[DateCreated], [c].[UserID]\nFROM [CustomerOrders] AS [c]\nWHERE [c].[OrderId] = @__orderid_0",
+					"-- Ripple1313127786:[13]\n\nSELECT [c].[OrderDetailsId], [c].[OrderId], [c].[Price], [c].[ProductId], [c].[Quantity]\nFROM [CustomerOrderDetails] AS [c]\nWHERE [c].[OrderId] = @__orderid_0",
+					"-- Ripple1313127786:[12]\n\nSELECT TOP(1) [c].[OrderId], [c].[CartTotal], [c].[DateCreated], [c].[UserID]\nFROM [CustomerOrders] AS [c]\nWHERE [c].[OrderId] = @__orderid_0",
+					"-- Ripple1313127786:[13]\n\nSELECT [c].[OrderDetailsId], [c].[OrderId], [c].[Price], [c].[ProductId], [c].[Quantity]\nFROM [CustomerOrderDetails] AS [c]\nWHERE [c].[OrderId] = @__orderid_0"
+				],
+				"readOnly": true,
+				"hasTransactions": true
+			},
+			{
+				"name": "BookCart.Controllers.OrderController.Get (BookCart)",
+				"transactions": [
+					{
+						"children": [],
+						"readTypes": [
+							"BookCart.Models.CustomerOrders"
+						],
+						"writeTypes": [],
+						"readOnly": true
+					},
+					{
+						"children": [],
+						"readTypes": [
+							"BookCart.Models.CustomerOrders"
+						],
+						"writeTypes": [],
+						"readOnly": true
+					},
+					{
+						"children": [],
+						"readTypes": [
+							"BookCart.Models.CustomerOrderDetails"
+						],
+						"writeTypes": [],
+						"readOnly": true
+					},
+					{
+						"children": [],
+						"readTypes": [
+							"BookCart.Models.CustomerOrders"
+						],
+						"writeTypes": [],
+						"readOnly": true
+					},
+					{
+						"children": [],
+						"readTypes": [
+							"BookCart.Models.CustomerOrderDetails"
+						],
+						"writeTypes": [],
+						"readOnly": true
+					},
+					{
+						"children": [],
+						"readTypes": [
+							"BookCart.Models.Book"
+						],
+						"writeTypes": [],
+						"readOnly": true
+					},
+					{
+						"children": [],
+						"readTypes": [
+							"BookCart.Models.CustomerOrders"
+						],
+						"writeTypes": [],
+						"readOnly": true
+					},
+					{
+						"children": [],
+						"readTypes": [
+							"BookCart.Models.CustomerOrderDetails"
+						],
+						"writeTypes": [],
+						"readOnly": true
+					},
+					{
+						"children": [],
+						"readTypes": [
+							"BookCart.Models.CustomerOrders"
+						],
+						"writeTypes": [],
+						"readOnly": true
+					},
+					{
+						"children": [],
+						"readTypes": [
+							"BookCart.Models.CustomerOrderDetails"
+						],
+						"writeTypes": [],
+						"readOnly": true
+					},
+					{
+						"children": [],
+						"readTypes": [
+							"BookCart.Models.CustomerOrders"
+						],
+						"writeTypes": [],
+						"readOnly": true
+					},
+					{
+						"children": [],
+						"readTypes": [
+							"BookCart.Models.CustomerOrderDetails"
+						],
+						"writeTypes": [],
+						"readOnly": true
+					},
+					{
+						"children": [],
+						"readTypes": [
+							"BookCart.Models.CustomerOrders"
+						],
+						"writeTypes": [],
+						"readOnly": true
+					},
+					{
+						"children": [],
+						"readTypes": [
+							"BookCart.Models.CustomerOrderDetails"
+						],
+						"writeTypes": [],
+						"readOnly": true
+					},
+					{
+						"children": [],
+						"readTypes": [
+							"BookCart.Models.CustomerOrders"
+						],
+						"writeTypes": [],
+						"readOnly": true
+					},
+					{
+						"children": [],
+						"readTypes": [
+							"BookCart.Models.CustomerOrderDetails"
+						],
+						"writeTypes": [],
+						"readOnly": true
+					}
+				],
+				"commands": [
+					"-- Ripple1313127786:[11]\n\nSELECT [c].[OrderId]\nFROM [CustomerOrders] AS [c]\nWHERE [c].[UserID] = @__userId_0",
+					"-- Ripple1313127786:[12]\n\nSELECT TOP(1) [c].[OrderId], [c].[CartTotal], [c].[DateCreated], [c].[UserID]\nFROM [CustomerOrders] AS [c]\nWHERE [c].[OrderId] = @__orderid_0",
+					"-- Ripple1313127786:[13]\n\nSELECT [c].[OrderDetailsId], [c].[OrderId], [c].[Price], [c].[ProductId], [c].[Quantity]\nFROM [CustomerOrderDetails] AS [c]\nWHERE [c].[OrderId] = @__orderid_0",
+					"-- Ripple1313127786:[12]\n\nSELECT TOP(1) [c].[OrderId], [c].[CartTotal], [c].[DateCreated], [c].[UserID]\nFROM [CustomerOrders] AS [c]\nWHERE [c].[OrderId] = @__orderid_0",
+					"-- Ripple1313127786:[13]\n\nSELECT [c].[OrderDetailsId], [c].[OrderId], [c].[Price], [c].[ProductId], [c].[Quantity]\nFROM [CustomerOrderDetails] AS [c]\nWHERE [c].[OrderId] = @__orderid_0",
+					"-- Ripple1313127786:[14]\n\nSELECT TOP(1) [b].[BookID], [b].[Author], [b].[Category], [b].[CoverFileName], [b].[Price], [b].[Title]\nFROM [Book] AS [b]\nWHERE [b].[BookID] = @__customerOrderDetail_ProductId_0",
+					"-- Ripple1313127786:[12]\n\nSELECT TOP(1) [c].[OrderId], [c].[CartTotal], [c].[DateCreated], [c].[UserID]\nFROM [CustomerOrders] AS [c]\nWHERE [c].[OrderId] = @__orderid_0",
+					"-- Ripple1313127786:[13]\n\nSELECT [c].[OrderDetailsId], [c].[OrderId], [c].[Price], [c].[ProductId], [c].[Quantity]\nFROM [CustomerOrderDetails] AS [c]\nWHERE [c].[OrderId] = @__orderid_0",
+					"-- Ripple1313127786:[12]\n\nSELECT TOP(1) [c].[OrderId], [c].[CartTotal], [c].[DateCreated], [c].[UserID]\nFROM [CustomerOrders] AS [c]\nWHERE [c].[OrderId] = @__orderid_0",
+					"-- Ripple1313127786:[13]\n\nSELECT [c].[OrderDetailsId], [c].[OrderId], [c].[Price], [c].[ProductId], [c].[Quantity]\nFROM [CustomerOrderDetails] AS [c]\nWHERE [c].[OrderId] = @__orderid_0",
+					"-- Ripple1313127786:[12]\n\nSELECT TOP(1) [c].[OrderId], [c].[CartTotal], [c].[DateCreated], [c].[UserID]\nFROM [CustomerOrders] AS [c]\nWHERE [c].[OrderId] = @__orderid_0",
+					"-- Ripple1313127786:[13]\n\nSELECT [c].[OrderDetailsId], [c].[OrderId], [c].[Price], [c].[ProductId], [c].[Quantity]\nFROM [CustomerOrderDetails] AS [c]\nWHERE [c].[OrderId] = @__orderid_0",
+					"-- Ripple1313127786:[12]\n\nSELECT TOP(1) [c].[OrderId], [c].[CartTotal], [c].[DateCreated], [c].[UserID]\nFROM [CustomerOrders] AS [c]\nWHERE [c].[OrderId] = @__orderid_0",
+					"-- Ripple1313127786:[13]\n\nSELECT [c].[OrderDetailsId], [c].[OrderId], [c].[Price], [c].[ProductId], [c].[Quantity]\nFROM [CustomerOrderDetails] AS [c]\nWHERE [c].[OrderId] = @__orderid_0",
+					"-- Ripple1313127786:[12]\n\nSELECT TOP(1) [c].[OrderId], [c].[CartTotal], [c].[DateCreated], [c].[UserID]\nFROM [CustomerOrders] AS [c]\nWHERE [c].[OrderId] = @__orderid_0",
+					"-- Ripple1313127786:[13]\n\nSELECT [c].[OrderDetailsId], [c].[OrderId], [c].[Price], [c].[ProductId], [c].[Quantity]\nFROM [CustomerOrderDetails] AS [c]\nWHERE [c].[OrderId] = @__orderid_0"
+				],
+				"readOnly": true,
+				"hasTransactions": true
+			},
+			{
+				"name": "BookCart.Controllers.OrderController.Get (BookCart)",
+				"transactions": [
+					{
+						"children": [],
+						"readTypes": [
+							"BookCart.Models.CustomerOrders"
+						],
+						"writeTypes": [],
+						"readOnly": true
+					},
+					{
+						"children": [],
+						"readTypes": [
+							"BookCart.Models.CustomerOrders"
+						],
+						"writeTypes": [],
+						"readOnly": true
+					},
+					{
+						"children": [],
+						"readTypes": [
+							"BookCart.Models.CustomerOrderDetails"
+						],
+						"writeTypes": [],
+						"readOnly": true
+					},
+					{
+						"children": [],
+						"readTypes": [
+							"BookCart.Models.CustomerOrders"
+						],
+						"writeTypes": [],
+						"readOnly": true
+					},
+					{
+						"children": [],
+						"readTypes": [
+							"BookCart.Models.CustomerOrderDetails"
+						],
+						"writeTypes": [],
+						"readOnly": true
+					},
+					{
+						"children": [],
+						"readTypes": [
+							"BookCart.Models.Book"
+						],
+						"writeTypes": [],
+						"readOnly": true
+					},
+					{
+						"children": [],
+						"readTypes": [
+							"BookCart.Models.CustomerOrders"
+						],
+						"writeTypes": [],
+						"readOnly": true
+					},
+					{
+						"children": [],
+						"readTypes": [
+							"BookCart.Models.CustomerOrderDetails"
+						],
+						"writeTypes": [],
+						"readOnly": true
+					},
+					{
+						"children": [],
+						"readTypes": [
+							"BookCart.Models.CustomerOrders"
+						],
+						"writeTypes": [],
+						"readOnly": true
+					},
+					{
+						"children": [],
+						"readTypes": [
+							"BookCart.Models.CustomerOrderDetails"
+						],
+						"writeTypes": [],
+						"readOnly": true
+					},
+					{
+						"children": [],
+						"readTypes": [
+							"BookCart.Models.CustomerOrders"
+						],
+						"writeTypes": [],
+						"readOnly": true
+					},
+					{
+						"children": [],
+						"readTypes": [
+							"BookCart.Models.CustomerOrderDetails"
+						],
+						"writeTypes": [],
+						"readOnly": true
+					},
+					{
+						"children": [],
+						"readTypes": [
+							"BookCart.Models.CustomerOrders"
+						],
+						"writeTypes": [],
+						"readOnly": true
+					},
+					{
+						"children": [],
+						"readTypes": [
+							"BookCart.Models.CustomerOrderDetails"
+						],
+						"writeTypes": [],
+						"readOnly": true
+					},
+					{
+						"children": [],
+						"readTypes": [
+							"BookCart.Models.CustomerOrders"
+						],
+						"writeTypes": [],
+						"readOnly": true
+					},
+					{
+						"children": [],
+						"readTypes": [
+							"BookCart.Models.CustomerOrderDetails"
+						],
+						"writeTypes": [],
+						"readOnly": true
+					},
+					{
+						"children": [],
+						"readTypes": [
+							"BookCart.Models.CustomerOrders"
+						],
+						"writeTypes": [],
+						"readOnly": true
+					},
+					{
+						"children": [],
+						"readTypes": [
+							"BookCart.Models.CustomerOrderDetails"
+						],
+						"writeTypes": [],
+						"readOnly": true
+					}
+				],
+				"commands": [
+					"-- Ripple1313127786:[11]\n\nSELECT [c].[OrderId]\nFROM [CustomerOrders] AS [c]\nWHERE [c].[UserID] = @__userId_0",
+					"-- Ripple1313127786:[12]\n\nSELECT TOP(1) [c].[OrderId], [c].[CartTotal], [c].[DateCreated], [c].[UserID]\nFROM [CustomerOrders] AS [c]\nWHERE [c].[OrderId] = @__orderid_0",
+					"-- Ripple1313127786:[13]\n\nSELECT [c].[OrderDetailsId], [c].[OrderId], [c].[Price], [c].[ProductId], [c].[Quantity]\nFROM [CustomerOrderDetails] AS [c]\nWHERE [c].[OrderId] = @__orderid_0",
+					"-- Ripple1313127786:[12]\n\nSELECT TOP(1) [c].[OrderId], [c].[CartTotal], [c].[DateCreated], [c].[UserID]\nFROM [CustomerOrders] AS [c]\nWHERE [c].[OrderId] = @__orderid_0",
+					"-- Ripple1313127786:[13]\n\nSELECT [c].[OrderDetailsId], [c].[OrderId], [c].[Price], [c].[ProductId], [c].[Quantity]\nFROM [CustomerOrderDetails] AS [c]\nWHERE [c].[OrderId] = @__orderid_0",
+					"-- Ripple1313127786:[14]\n\nSELECT TOP(1) [b].[BookID], [b].[Author], [b].[Category], [b].[CoverFileName], [b].[Price], [b].[Title]\nFROM [Book] AS [b]\nWHERE [b].[BookID] = @__customerOrderDetail_ProductId_0",
+					"-- Ripple1313127786:[12]\n\nSELECT TOP(1) [c].[OrderId], [c].[CartTotal], [c].[DateCreated], [c].[UserID]\nFROM [CustomerOrders] AS [c]\nWHERE [c].[OrderId] = @__orderid_0",
+					"-- Ripple1313127786:[13]\n\nSELECT [c].[OrderDetailsId], [c].[OrderId], [c].[Price], [c].[ProductId], [c].[Quantity]\nFROM [CustomerOrderDetails] AS [c]\nWHERE [c].[OrderId] = @__orderid_0",
+					"-- Ripple1313127786:[12]\n\nSELECT TOP(1) [c].[OrderId], [c].[CartTotal], [c].[DateCreated], [c].[UserID]\nFROM [CustomerOrders] AS [c]\nWHERE [c].[OrderId] = @__orderid_0",
+					"-- Ripple1313127786:[13]\n\nSELECT [c].[OrderDetailsId], [c].[OrderId], [c].[Price], [c].[ProductId], [c].[Quantity]\nFROM [CustomerOrderDetails] AS [c]\nWHERE [c].[OrderId] = @__orderid_0",
+					"-- Ripple1313127786:[12]\n\nSELECT TOP(1) [c].[OrderId], [c].[CartTotal], [c].[DateCreated], [c].[UserID]\nFROM [CustomerOrders] AS [c]\nWHERE [c].[OrderId] = @__orderid_0",
+					"-- Ripple1313127786:[13]\n\nSELECT [c].[OrderDetailsId], [c].[OrderId], [c].[Price], [c].[ProductId], [c].[Quantity]\nFROM [CustomerOrderDetails] AS [c]\nWHERE [c].[OrderId] = @__orderid_0",
+					"-- Ripple1313127786:[12]\n\nSELECT TOP(1) [c].[OrderId], [c].[CartTotal], [c].[DateCreated], [c].[UserID]\nFROM [CustomerOrders] AS [c]\nWHERE [c].[OrderId] = @__orderid_0",
+					"-- Ripple1313127786:[13]\n\nSELECT [c].[OrderDetailsId], [c].[OrderId], [c].[Price], [c].[ProductId], [c].[Quantity]\nFROM [CustomerOrderDetails] AS [c]\nWHERE [c].[OrderId] = @__orderid_0",
+					"-- Ripple1313127786:[12]\n\nSELECT TOP(1) [c].[OrderId], [c].[CartTotal], [c].[DateCreated], [c].[UserID]\nFROM [CustomerOrders] AS [c]\nWHERE [c].[OrderId] = @__orderid_0",
+					"-- Ripple1313127786:[13]\n\nSELECT [c].[OrderDetailsId], [c].[OrderId], [c].[Price], [c].[ProductId], [c].[Quantity]\nFROM [CustomerOrderDetails] AS [c]\nWHERE [c].[OrderId] = @__orderid_0",
+					"-- Ripple1313127786:[12]\n\nSELECT TOP(1) [c].[OrderId], [c].[CartTotal], [c].[DateCreated], [c].[UserID]\nFROM [CustomerOrders] AS [c]\nWHERE [c].[OrderId] = @__orderid_0",
+					"-- Ripple1313127786:[13]\n\nSELECT [c].[OrderDetailsId], [c].[OrderId], [c].[Price], [c].[ProductId], [c].[Quantity]\nFROM [CustomerOrderDetails] AS [c]\nWHERE [c].[OrderId] = @__orderid_0"
+				],
+				"readOnly": true,
+				"hasTransactions": true
+			},
+			{
+				"name": "BookCart.Controllers.OrderController.Get (BookCart)",
+				"transactions": [
+					{
+						"children": [],
+						"readTypes": [
+							"BookCart.Models.CustomerOrders"
+						],
+						"writeTypes": [],
+						"readOnly": true
+					},
+					{
+						"children": [],
+						"readTypes": [
+							"BookCart.Models.CustomerOrders"
+						],
+						"writeTypes": [],
+						"readOnly": true
+					},
+					{
+						"children": [],
+						"readTypes": [
+							"BookCart.Models.CustomerOrderDetails"
+						],
+						"writeTypes": [],
+						"readOnly": true
+					},
+					{
+						"children": [],
+						"readTypes": [
+							"BookCart.Models.CustomerOrders"
+						],
+						"writeTypes": [],
+						"readOnly": true
+					},
+					{
+						"children": [],
+						"readTypes": [
+							"BookCart.Models.CustomerOrderDetails"
+						],
+						"writeTypes": [],
+						"readOnly": true
+					},
+					{
+						"children": [],
+						"readTypes": [
+							"BookCart.Models.Book"
+						],
+						"writeTypes": [],
+						"readOnly": true
+					},
+					{
+						"children": [],
+						"readTypes": [
+							"BookCart.Models.CustomerOrders"
+						],
+						"writeTypes": [],
+						"readOnly": true
+					},
+					{
+						"children": [],
+						"readTypes": [
+							"BookCart.Models.CustomerOrderDetails"
+						],
+						"writeTypes": [],
+						"readOnly": true
+					},
+					{
+						"children": [],
+						"readTypes": [
+							"BookCart.Models.CustomerOrders"
+						],
+						"writeTypes": [],
+						"readOnly": true
+					},
+					{
+						"children": [],
+						"readTypes": [
+							"BookCart.Models.CustomerOrderDetails"
+						],
+						"writeTypes": [],
+						"readOnly": true
+					},
+					{
+						"children": [],
+						"readTypes": [
+							"BookCart.Models.CustomerOrders"
+						],
+						"writeTypes": [],
+						"readOnly": true
+					},
+					{
+						"children": [],
+						"readTypes": [
+							"BookCart.Models.CustomerOrderDetails"
+						],
+						"writeTypes": [],
+						"readOnly": true
+					},
+					{
+						"children": [],
+						"readTypes": [
+							"BookCart.Models.CustomerOrders"
+						],
+						"writeTypes": [],
+						"readOnly": true
+					},
+					{
+						"children": [],
+						"readTypes": [
+							"BookCart.Models.CustomerOrderDetails"
+						],
+						"writeTypes": [],
+						"readOnly": true
+					},
+					{
+						"children": [],
+						"readTypes": [
+							"BookCart.Models.CustomerOrders"
+						],
+						"writeTypes": [],
+						"readOnly": true
+					},
+					{
+						"children": [],
+						"readTypes": [
+							"BookCart.Models.CustomerOrderDetails"
+						],
+						"writeTypes": [],
+						"readOnly": true
+					},
+					{
+						"children": [],
+						"readTypes": [
+							"BookCart.Models.CustomerOrders"
+						],
+						"writeTypes": [],
+						"readOnly": true
+					},
+					{
+						"children": [],
+						"readTypes": [
+							"BookCart.Models.CustomerOrderDetails"
+						],
+						"writeTypes": [],
+						"readOnly": true
+					},
+					{
+						"children": [],
+						"readTypes": [
+							"BookCart.Models.CustomerOrders"
+						],
+						"writeTypes": [],
+						"readOnly": true
+					},
+					{
+						"children": [],
+						"readTypes": [
+							"BookCart.Models.CustomerOrderDetails"
+						],
+						"writeTypes": [],
+						"readOnly": true
+					}
+				],
+				"commands": [
+					"-- Ripple1313127786:[11]\n\nSELECT [c].[OrderId]\nFROM [CustomerOrders] AS [c]\nWHERE [c].[UserID] = @__userId_0",
+					"-- Ripple1313127786:[12]\n\nSELECT TOP(1) [c].[OrderId], [c].[CartTotal], [c].[DateCreated], [c].[UserID]\nFROM [CustomerOrders] AS [c]\nWHERE [c].[OrderId] = @__orderid_0",
+					"-- Ripple1313127786:[13]\n\nSELECT [c].[OrderDetailsId], [c].[OrderId], [c].[Price], [c].[ProductId], [c].[Quantity]\nFROM [CustomerOrderDetails] AS [c]\nWHERE [c].[OrderId] = @__orderid_0",
+					"-- Ripple1313127786:[12]\n\nSELECT TOP(1) [c].[OrderId], [c].[CartTotal], [c].[DateCreated], [c].[UserID]\nFROM [CustomerOrders] AS [c]\nWHERE [c].[OrderId] = @__orderid_0",
+					"-- Ripple1313127786:[13]\n\nSELECT [c].[OrderDetailsId], [c].[OrderId], [c].[Price], [c].[ProductId], [c].[Quantity]\nFROM [CustomerOrderDetails] AS [c]\nWHERE [c].[OrderId] = @__orderid_0",
+					"-- Ripple1313127786:[14]\n\nSELECT TOP(1) [b].[BookID], [b].[Author], [b].[Category], [b].[CoverFileName], [b].[Price], [b].[Title]\nFROM [Book] AS [b]\nWHERE [b].[BookID] = @__customerOrderDetail_ProductId_0",
+					"-- Ripple1313127786:[12]\n\nSELECT TOP(1) [c].[OrderId], [c].[CartTotal], [c].[DateCreated], [c].[UserID]\nFROM [CustomerOrders] AS [c]\nWHERE [c].[OrderId] = @__orderid_0",
+					"-- Ripple1313127786:[13]\n\nSELECT [c].[OrderDetailsId], [c].[OrderId], [c].[Price], [c].[ProductId], [c].[Quantity]\nFROM [CustomerOrderDetails] AS [c]\nWHERE [c].[OrderId] = @__orderid_0",
+					"-- Ripple1313127786:[12]\n\nSELECT TOP(1) [c].[OrderId], [c].[CartTotal], [c].[DateCreated], [c].[UserID]\nFROM [CustomerOrders] AS [c]\nWHERE [c].[OrderId] = @__orderid_0",
+					"-- Ripple1313127786:[13]\n\nSELECT [c].[OrderDetailsId], [c].[OrderId], [c].[Price], [c].[ProductId], [c].[Quantity]\nFROM [CustomerOrderDetails] AS [c]\nWHERE [c].[OrderId] = @__orderid_0",
+					"-- Ripple1313127786:[12]\n\nSELECT TOP(1) [c].[OrderId], [c].[CartTotal], [c].[DateCreated], [c].[UserID]\nFROM [CustomerOrders] AS [c]\nWHERE [c].[OrderId] = @__orderid_0",
+					"-- Ripple1313127786:[13]\n\nSELECT [c].[OrderDetailsId], [c].[OrderId], [c].[Price], [c].[ProductId], [c].[Quantity]\nFROM [CustomerOrderDetails] AS [c]\nWHERE [c].[OrderId] = @__orderid_0",
+					"-- Ripple1313127786:[12]\n\nSELECT TOP(1) [c].[OrderId], [c].[CartTotal], [c].[DateCreated], [c].[UserID]\nFROM [CustomerOrders] AS [c]\nWHERE [c].[OrderId] = @__orderid_0",
+					"-- Ripple1313127786:[13]\n\nSELECT [c].[OrderDetailsId], [c].[OrderId], [c].[Price], [c].[ProductId], [c].[Quantity]\nFROM [CustomerOrderDetails] AS [c]\nWHERE [c].[OrderId] = @__orderid_0",
+					"-- Ripple1313127786:[12]\n\nSELECT TOP(1) [c].[OrderId], [c].[CartTotal], [c].[DateCreated], [c].[UserID]\nFROM [CustomerOrders] AS [c]\nWHERE [c].[OrderId] = @__orderid_0",
+					"-- Ripple1313127786:[13]\n\nSELECT [c].[OrderDetailsId], [c].[OrderId], [c].[Price], [c].[ProductId], [c].[Quantity]\nFROM [CustomerOrderDetails] AS [c]\nWHERE [c].[OrderId] = @__orderid_0",
+					"-- Ripple1313127786:[12]\n\nSELECT TOP(1) [c].[OrderId], [c].[CartTotal], [c].[DateCreated], [c].[UserID]\nFROM [CustomerOrders] AS [c]\nWHERE [c].[OrderId] = @__orderid_0",
+					"-- Ripple1313127786:[13]\n\nSELECT [c].[OrderDetailsId], [c].[OrderId], [c].[Price], [c].[ProductId], [c].[Quantity]\nFROM [CustomerOrderDetails] AS [c]\nWHERE [c].[OrderId] = @__orderid_0",
+					"-- Ripple1313127786:[12]\n\nSELECT TOP(1) [c].[OrderId], [c].[CartTotal], [c].[DateCreated], [c].[UserID]\nFROM [CustomerOrders] AS [c]\nWHERE [c].[OrderId] = @__orderid_0",
+					"-- Ripple1313127786:[13]\n\nSELECT [c].[OrderDetailsId], [c].[OrderId], [c].[Price], [c].[ProductId], [c].[Quantity]\nFROM [CustomerOrderDetails] AS [c]\nWHERE [c].[OrderId] = @__orderid_0"
+				],
+				"readOnly": true,
+				"hasTransactions": true
+			},
+			{
+				"name": "BookCart.Controllers.OrderController.Get (BookCart)",
+				"transactions": [
+					{
+						"children": [],
+						"readTypes": [
+							"BookCart.Models.CustomerOrders"
+						],
+						"writeTypes": [],
+						"readOnly": true
+					},
+					{
+						"children": [],
+						"readTypes": [
+							"BookCart.Models.CustomerOrders"
+						],
+						"writeTypes": [],
+						"readOnly": true
+					},
+					{
+						"children": [],
+						"readTypes": [
+							"BookCart.Models.CustomerOrderDetails"
+						],
+						"writeTypes": [],
+						"readOnly": true
+					},
+					{
+						"children": [],
+						"readTypes": [
+							"BookCart.Models.CustomerOrders"
+						],
+						"writeTypes": [],
+						"readOnly": true
+					},
+					{
+						"children": [],
+						"readTypes": [
+							"BookCart.Models.CustomerOrderDetails"
+						],
+						"writeTypes": [],
+						"readOnly": true
+					},
+					{
+						"children": [],
+						"readTypes": [
+							"BookCart.Models.Book"
+						],
+						"writeTypes": [],
+						"readOnly": true
+					},
+					{
+						"children": [],
+						"readTypes": [
+							"BookCart.Models.CustomerOrders"
+						],
+						"writeTypes": [],
+						"readOnly": true
+					},
+					{
+						"children": [],
+						"readTypes": [
+							"BookCart.Models.CustomerOrderDetails"
+						],
+						"writeTypes": [],
+						"readOnly": true
+					},
+					{
+						"children": [],
+						"readTypes": [
+							"BookCart.Models.Book"
+						],
+						"writeTypes": [],
+						"readOnly": true
+					},
+					{
+						"children": [],
+						"readTypes": [
+							"BookCart.Models.CustomerOrders"
+						],
+						"writeTypes": [],
+						"readOnly": true
+					},
+					{
+						"children": [],
+						"readTypes": [
+							"BookCart.Models.CustomerOrderDetails"
+						],
+						"writeTypes": [],
+						"readOnly": true
+					},
+					{
+						"children": [],
+						"readTypes": [
+							"BookCart.Models.CustomerOrders"
+						],
+						"writeTypes": [],
+						"readOnly": true
+					},
+					{
+						"children": [],
+						"readTypes": [
+							"BookCart.Models.CustomerOrderDetails"
+						],
+						"writeTypes": [],
+						"readOnly": true
+					},
+					{
+						"children": [],
+						"readTypes": [
+							"BookCart.Models.CustomerOrders"
+						],
+						"writeTypes": [],
+						"readOnly": true
+					},
+					{
+						"children": [],
+						"readTypes": [
+							"BookCart.Models.CustomerOrderDetails"
+						],
+						"writeTypes": [],
+						"readOnly": true
+					},
+					{
+						"children": [],
+						"readTypes": [
+							"BookCart.Models.CustomerOrders"
+						],
+						"writeTypes": [],
+						"readOnly": true
+					},
+					{
+						"children": [],
+						"readTypes": [
+							"BookCart.Models.CustomerOrderDetails"
+						],
+						"writeTypes": [],
+						"readOnly": true
+					},
+					{
+						"children": [],
+						"readTypes": [
+							"BookCart.Models.CustomerOrders"
+						],
+						"writeTypes": [],
+						"readOnly": true
+					},
+					{
+						"children": [],
+						"readTypes": [
+							"BookCart.Models.CustomerOrderDetails"
+						],
+						"writeTypes": [],
+						"readOnly": true
+					},
+					{
+						"children": [],
+						"readTypes": [
+							"BookCart.Models.CustomerOrders"
+						],
+						"writeTypes": [],
+						"readOnly": true
+					},
+					{
+						"children": [],
+						"readTypes": [
+							"BookCart.Models.CustomerOrderDetails"
+						],
+						"writeTypes": [],
+						"readOnly": true
+					},
+					{
+						"children": [],
+						"readTypes": [
+							"BookCart.Models.CustomerOrders"
+						],
+						"writeTypes": [],
+						"readOnly": true
+					},
+					{
+						"children": [],
+						"readTypes": [
+							"BookCart.Models.CustomerOrderDetails"
+						],
+						"writeTypes": [],
+						"readOnly": true
+					}
+				],
+				"commands": [
+					"-- Ripple1313127786:[11]\n\nSELECT [c].[OrderId]\nFROM [CustomerOrders] AS [c]\nWHERE [c].[UserID] = @__userId_0",
+					"-- Ripple1313127786:[12]\n\nSELECT TOP(1) [c].[OrderId], [c].[CartTotal], [c].[DateCreated], [c].[UserID]\nFROM [CustomerOrders] AS [c]\nWHERE [c].[OrderId] = @__orderid_0",
+					"-- Ripple1313127786:[13]\n\nSELECT [c].[OrderDetailsId], [c].[OrderId], [c].[Price], [c].[ProductId], [c].[Quantity]\nFROM [CustomerOrderDetails] AS [c]\nWHERE [c].[OrderId] = @__orderid_0",
+					"-- Ripple1313127786:[12]\n\nSELECT TOP(1) [c].[OrderId], [c].[CartTotal], [c].[DateCreated], [c].[UserID]\nFROM [CustomerOrders] AS [c]\nWHERE [c].[OrderId] = @__orderid_0",
+					"-- Ripple1313127786:[13]\n\nSELECT [c].[OrderDetailsId], [c].[OrderId], [c].[Price], [c].[ProductId], [c].[Quantity]\nFROM [CustomerOrderDetails] AS [c]\nWHERE [c].[OrderId] = @__orderid_0",
+					"-- Ripple1313127786:[14]\n\nSELECT TOP(1) [b].[BookID], [b].[Author], [b].[Category], [b].[CoverFileName], [b].[Price], [b].[Title]\nFROM [Book] AS [b]\nWHERE [b].[BookID] = @__customerOrderDetail_ProductId_0",
+					"-- Ripple1313127786:[12]\n\nSELECT TOP(1) [c].[OrderId], [c].[CartTotal], [c].[DateCreated], [c].[UserID]\nFROM [CustomerOrders] AS [c]\nWHERE [c].[OrderId] = @__orderid_0",
+					"-- Ripple1313127786:[13]\n\nSELECT [c].[OrderDetailsId], [c].[OrderId], [c].[Price], [c].[ProductId], [c].[Quantity]\nFROM [CustomerOrderDetails] AS [c]\nWHERE [c].[OrderId] = @__orderid_0",
+					"-- Ripple1313127786:[14]\n\nSELECT TOP(1) [b].[BookID], [b].[Author], [b].[Category], [b].[CoverFileName], [b].[Price], [b].[Title]\nFROM [Book] AS [b]\nWHERE [b].[BookID] = @__customerOrderDetail_ProductId_0",
+					"-- Ripple1313127786:[12]\n\nSELECT TOP(1) [c].[OrderId], [c].[CartTotal], [c].[DateCreated], [c].[UserID]\nFROM [CustomerOrders] AS [c]\nWHERE [c].[OrderId] = @__orderid_0",
+					"-- Ripple1313127786:[13]\n\nSELECT [c].[OrderDetailsId], [c].[OrderId], [c].[Price], [c].[ProductId], [c].[Quantity]\nFROM [CustomerOrderDetails] AS [c]\nWHERE [c].[OrderId] = @__orderid_0",
+					"-- Ripple1313127786:[12]\n\nSELECT TOP(1) [c].[OrderId], [c].[CartTotal], [c].[DateCreated], [c].[UserID]\nFROM [CustomerOrders] AS [c]\nWHERE [c].[OrderId] = @__orderid_0",
+					"-- Ripple1313127786:[13]\n\nSELECT [c].[OrderDetailsId], [c].[OrderId], [c].[Price], [c].[ProductId], [c].[Quantity]\nFROM [CustomerOrderDetails] AS [c]\nWHERE [c].[OrderId] = @__orderid_0",
+					"-- Ripple1313127786:[12]\n\nSELECT TOP(1) [c].[OrderId], [c].[CartTotal], [c].[DateCreated], [c].[UserID]\nFROM [CustomerOrders] AS [c]\nWHERE [c].[OrderId] = @__orderid_0",
+					"-- Ripple1313127786:[13]\n\nSELECT [c].[OrderDetailsId], [c].[OrderId], [c].[Price], [c].[ProductId], [c].[Quantity]\nFROM [CustomerOrderDetails] AS [c]\nWHERE [c].[OrderId] = @__orderid_0",
+					"-- Ripple1313127786:[12]\n\nSELECT TOP(1) [c].[OrderId], [c].[CartTotal], [c].[DateCreated], [c].[UserID]\nFROM [CustomerOrders] AS [c]\nWHERE [c].[OrderId] = @__orderid_0",
+					"-- Ripple1313127786:[13]\n\nSELECT [c].[OrderDetailsId], [c].[OrderId], [c].[Price], [c].[ProductId], [c].[Quantity]\nFROM [CustomerOrderDetails] AS [c]\nWHERE [c].[OrderId] = @__orderid_0",
+					"-- Ripple1313127786:[12]\n\nSELECT TOP(1) [c].[OrderId], [c].[CartTotal], [c].[DateCreated], [c].[UserID]\nFROM [CustomerOrders] AS [c]\nWHERE [c].[OrderId] = @__orderid_0",
+					"-- Ripple1313127786:[13]\n\nSELECT [c].[OrderDetailsId], [c].[OrderId], [c].[Price], [c].[ProductId], [c].[Quantity]\nFROM [CustomerOrderDetails] AS [c]\nWHERE [c].[OrderId] = @__orderid_0",
+					"-- Ripple1313127786:[12]\n\nSELECT TOP(1) [c].[OrderId], [c].[CartTotal], [c].[DateCreated], [c].[UserID]\nFROM [CustomerOrders] AS [c]\nWHERE [c].[OrderId] = @__orderid_0",
+					"-- Ripple1313127786:[13]\n\nSELECT [c].[OrderDetailsId], [c].[OrderId], [c].[Price], [c].[ProductId], [c].[Quantity]\nFROM [CustomerOrderDetails] AS [c]\nWHERE [c].[OrderId] = @__orderid_0",
+					"-- Ripple1313127786:[12]\n\nSELECT TOP(1) [c].[OrderId], [c].[CartTotal], [c].[DateCreated], [c].[UserID]\nFROM [CustomerOrders] AS [c]\nWHERE [c].[OrderId] = @__orderid_0",
+					"-- Ripple1313127786:[13]\n\nSELECT [c].[OrderDetailsId], [c].[OrderId], [c].[Price], [c].[ProductId], [c].[Quantity]\nFROM [CustomerOrderDetails] AS [c]\nWHERE [c].[OrderId] = @__orderid_0"
 				],
 				"readOnly": true,
 				"hasTransactions": true
@@ -175,11 +1184,11 @@
 					}
 				],
 				"commands": [
-					"-- Ripple1319389179:[5]\n\nSELECT TOP(1) [c].[CartId], [c].[DateCreated], [c].[UserID]\nFROM [Cart] AS [c]\nWHERE [c].[UserID] = @__userId_0",
-					"-- Ripple1319389179:[13]\n\nSELECT TOP(1) [c].[CartItemId], [c].[CartId], [c].[ProductId], [c].[Quantity]\nFROM [CartItems] AS [c]\nWHERE [c].[ProductId] = @__8__locals1_bookId_0 AND [c].[CartId] = @__cartId_1",
+					"-- Ripple1313127786:[1]\n\nSELECT TOP(1) [c].[CartId], [c].[DateCreated], [c].[UserID]\nFROM [Cart] AS [c]\nWHERE [c].[UserID] = @__userId_0",
+					"-- Ripple1313127786:[17]\n\nSELECT TOP(1) [c].[CartItemId], [c].[CartId], [c].[ProductId], [c].[Quantity]\nFROM [CartItems] AS [c]\nWHERE [c].[ProductId] = @__8__locals1_bookId_0 AND [c].[CartId] = @__cartId_1",
 					"SET IMPLICIT_TRANSACTIONS OFF;\nSET NOCOUNT ON;\nDELETE FROM [CartItems]\nOUTPUT 1\nWHERE [CartItemId] = @p0;\n",
-					"-- Ripple1319389179:[5]\n\nSELECT TOP(1) [c].[CartId], [c].[DateCreated], [c].[UserID]\nFROM [Cart] AS [c]\nWHERE [c].[UserID] = @__userId_0",
-					"-- Ripple1319389179:[8]\n\nSELECT [c].[CartItemId], [c].[CartId], [c].[ProductId], [c].[Quantity]\nFROM [CartItems] AS [c]\nWHERE [c].[CartId] = @__cartID_0"
+					"-- Ripple1313127786:[1]\n\nSELECT TOP(1) [c].[CartId], [c].[DateCreated], [c].[UserID]\nFROM [Cart] AS [c]\nWHERE [c].[UserID] = @__userId_0",
+					"-- Ripple1313127786:[4]\n\nSELECT [c].[CartItemId], [c].[CartId], [c].[ProductId], [c].[Quantity]\nFROM [CartItems] AS [c]\nWHERE [c].[CartId] = @__cartID_0"
 				],
 				"readOnly": false,
 				"hasTransactions": true
@@ -213,8 +1222,8 @@
 					}
 				],
 				"commands": [
-					"-- Ripple1319389179:[5]\n\nSELECT TOP(1) [c].[CartId], [c].[DateCreated], [c].[UserID]\nFROM [Cart] AS [c]\nWHERE [c].[UserID] = @__userId_0",
-					"-- Ripple1319389179:[19]\n\nSELECT [c].[CartItemId], [c].[CartId], [c].[ProductId], [c].[Quantity]\nFROM [CartItems] AS [c]\nWHERE [c].[CartId] = @__cartId_0"
+					"-- Ripple1313127786:[1]\n\nSELECT TOP(1) [c].[CartId], [c].[DateCreated], [c].[UserID]\nFROM [Cart] AS [c]\nWHERE [c].[UserID] = @__userId_0",
+					"-- Ripple1313127786:[10]\n\nSELECT [c].[CartItemId], [c].[CartId], [c].[ProductId], [c].[Quantity]\nFROM [CartItems] AS [c]\nWHERE [c].[CartId] = @__cartId_0"
 				],
 				"readOnly": false,
 				"hasTransactions": true
@@ -224,69 +1233,6 @@
 	{
 		"key": "BookCart.Controllers.ShoppingCartController.Get (BookCart)",
 		"value": [
-			{
-				"name": "BookCart.Controllers.ShoppingCartController.Get (BookCart)",
-				"transactions": [
-					{
-						"children": [],
-						"readTypes": [
-							"BookCart.Models.Cart"
-						],
-						"writeTypes": [],
-						"readOnly": true
-					},
-					{
-						"children": [],
-						"readTypes": [],
-						"writeTypes": [
-							"BookCart.Models.Cart"
-						],
-						"readOnly": false
-					},
-					{
-						"children": [],
-						"readTypes": [
-							"BookCart.Models.CartItems"
-						],
-						"writeTypes": [],
-						"readOnly": true
-					}
-				],
-				"commands": [
-					"-- Ripple1319389179:[5]\n\nSELECT TOP(1) [c].[CartId], [c].[DateCreated], [c].[UserID]\nFROM [Cart] AS [c]\nWHERE [c].[UserID] = @__userId_0",
-					"SET IMPLICIT_TRANSACTIONS OFF;\nSET NOCOUNT ON;\nINSERT INTO [Cart] ([CartId], [DateCreated], [UserID])\nVALUES (@p0, @p1, @p2);\n",
-					"-- Ripple1319389179:[8]\n\nSELECT [c].[CartItemId], [c].[CartId], [c].[ProductId], [c].[Quantity]\nFROM [CartItems] AS [c]\nWHERE [c].[CartId] = @__cartID_0"
-				],
-				"readOnly": false,
-				"hasTransactions": true
-			},
-			{
-				"name": "BookCart.Controllers.ShoppingCartController.Get (BookCart)",
-				"transactions": [
-					{
-						"children": [],
-						"readTypes": [
-							"BookCart.Models.Cart"
-						],
-						"writeTypes": [],
-						"readOnly": true
-					},
-					{
-						"children": [],
-						"readTypes": [
-							"BookCart.Models.CartItems"
-						],
-						"writeTypes": [],
-						"readOnly": true
-					}
-				],
-				"commands": [
-					"-- Ripple1319389179:[5]\n\nSELECT TOP(1) [c].[CartId], [c].[DateCreated], [c].[UserID]\nFROM [Cart] AS [c]\nWHERE [c].[UserID] = @__userId_0",
-					"-- Ripple1319389179:[8]\n\nSELECT [c].[CartItemId], [c].[CartId], [c].[ProductId], [c].[Quantity]\nFROM [CartItems] AS [c]\nWHERE [c].[CartId] = @__cartID_0"
-				],
-				"readOnly": true,
-				"hasTransactions": true
-			},
 			{
 				"name": "BookCart.Controllers.ShoppingCartController.Get (BookCart)",
 				"transactions": [
@@ -316,9 +1262,9 @@
 					}
 				],
 				"commands": [
-					"-- Ripple1319389179:[5]\n\nSELECT TOP(1) [c].[CartId], [c].[DateCreated], [c].[UserID]\nFROM [Cart] AS [c]\nWHERE [c].[UserID] = @__userId_0",
-					"-- Ripple1319389179:[8]\n\nSELECT [c].[CartItemId], [c].[CartId], [c].[ProductId], [c].[Quantity]\nFROM [CartItems] AS [c]\nWHERE [c].[CartId] = @__cartID_0",
-					"-- Ripple1319389179:[11]\n\nSELECT TOP(1) [b].[BookID], [b].[Author], [b].[Category], [b].[CoverFileName], [b].[Price], [b].[Title]\nFROM [Book] AS [b]\nWHERE [b].[BookID] = @__bookId_0"
+					"-- Ripple1313127786:[1]\n\nSELECT TOP(1) [c].[CartId], [c].[DateCreated], [c].[UserID]\nFROM [Cart] AS [c]\nWHERE [c].[UserID] = @__userId_0",
+					"-- Ripple1313127786:[4]\n\nSELECT [c].[CartItemId], [c].[CartId], [c].[ProductId], [c].[Quantity]\nFROM [CartItems] AS [c]\nWHERE [c].[CartId] = @__cartID_0",
+					"-- Ripple1313127786:[9]\n\nSELECT TOP(1) [b].[BookID], [b].[Author], [b].[Category], [b].[CoverFileName], [b].[Price], [b].[Title]\nFROM [Book] AS [b]\nWHERE [b].[BookID] = @__bookId_0"
 				],
 				"readOnly": true,
 				"hasTransactions": true
@@ -392,13 +1338,13 @@
 					}
 				],
 				"commands": [
-					"-- Ripple1319389179:[5]\n\nSELECT TOP(1) [c].[CartId], [c].[DateCreated], [c].[UserID]\nFROM [Cart] AS [c]\nWHERE [c].[UserID] = @__userId_0",
+					"-- Ripple1313127786:[1]\n\nSELECT TOP(1) [c].[CartId], [c].[DateCreated], [c].[UserID]\nFROM [Cart] AS [c]\nWHERE [c].[UserID] = @__userId_0",
 					"SET IMPLICIT_TRANSACTIONS OFF;\nSET NOCOUNT ON;\nINSERT INTO [Cart] ([CartId], [DateCreated], [UserID])\nVALUES (@p0, @p1, @p2);\n",
-					"-- Ripple1319389179:[5]\n\nSELECT TOP(1) [c].[CartId], [c].[DateCreated], [c].[UserID]\nFROM [Cart] AS [c]\nWHERE [c].[UserID] = @__userId_0",
-					"-- Ripple1319389179:[14]\n\nSELECT [c].[CartItemId], [c].[CartId], [c].[ProductId], [c].[Quantity]\nFROM [CartItems] AS [c]\nWHERE [c].[CartId] = @__tempCartId_0",
+					"-- Ripple1313127786:[1]\n\nSELECT TOP(1) [c].[CartId], [c].[DateCreated], [c].[UserID]\nFROM [Cart] AS [c]\nWHERE [c].[UserID] = @__userId_0",
+					"-- Ripple1313127786:[18]\n\nSELECT [c].[CartItemId], [c].[CartId], [c].[ProductId], [c].[Quantity]\nFROM [CartItems] AS [c]\nWHERE [c].[CartId] = @__tempCartId_0",
 					"SET IMPLICIT_TRANSACTIONS OFF;\nSET NOCOUNT ON;\nDELETE FROM [Cart]\nOUTPUT 1\nWHERE [CartId] = @p0;\n",
-					"-- Ripple1319389179:[5]\n\nSELECT TOP(1) [c].[CartId], [c].[DateCreated], [c].[UserID]\nFROM [Cart] AS [c]\nWHERE [c].[UserID] = @__userId_0",
-					"-- Ripple1319389179:[10]\n\nSELECT COALESCE(SUM([c].[Quantity]), 0)\nFROM [CartItems] AS [c]\nWHERE [c].[CartId] = @__cartId_0"
+					"-- Ripple1313127786:[1]\n\nSELECT TOP(1) [c].[CartId], [c].[DateCreated], [c].[UserID]\nFROM [Cart] AS [c]\nWHERE [c].[UserID] = @__userId_0",
+					"-- Ripple1313127786:[16]\n\nSELECT COALESCE(SUM([c].[Quantity]), 0)\nFROM [CartItems] AS [c]\nWHERE [c].[CartId] = @__cartId_0"
 				],
 				"readOnly": false,
 				"hasTransactions": true
@@ -462,12 +1408,12 @@
 					}
 				],
 				"commands": [
-					"-- Ripple1319389179:[5]\n\nSELECT TOP(1) [c].[CartId], [c].[DateCreated], [c].[UserID]\nFROM [Cart] AS [c]\nWHERE [c].[UserID] = @__userId_0",
-					"-- Ripple1319389179:[12]\n\nSELECT TOP(1) [c].[CartItemId], [c].[CartId], [c].[ProductId], [c].[Quantity]\nFROM [CartItems] AS [c]\nWHERE [c].[ProductId] = @__bookId_0 AND [c].[CartId] = @__cartId_1",
+					"-- Ripple1313127786:[1]\n\nSELECT TOP(1) [c].[CartId], [c].[DateCreated], [c].[UserID]\nFROM [Cart] AS [c]\nWHERE [c].[UserID] = @__userId_0",
+					"-- Ripple1313127786:[8]\n\nSELECT TOP(1) [c].[CartItemId], [c].[CartId], [c].[ProductId], [c].[Quantity]\nFROM [CartItems] AS [c]\nWHERE [c].[ProductId] = @__bookId_0 AND [c].[CartId] = @__cartId_1",
 					"SET IMPLICIT_TRANSACTIONS OFF;\nSET NOCOUNT ON;\nINSERT INTO [CartItems] ([CartId], [ProductId], [Quantity])\nOUTPUT INSERTED.[CartItemId]\nVALUES (@p0, @p1, @p2);\n",
-					"-- Ripple1319389179:[5]\n\nSELECT TOP(1) [c].[CartId], [c].[DateCreated], [c].[UserID]\nFROM [Cart] AS [c]\nWHERE [c].[UserID] = @__userId_0",
-					"-- Ripple1319389179:[8]\n\nSELECT [c].[CartItemId], [c].[CartId], [c].[ProductId], [c].[Quantity]\nFROM [CartItems] AS [c]\nWHERE [c].[CartId] = @__cartID_0",
-					"-- Ripple1319389179:[11]\n\nSELECT TOP(1) [b].[BookID], [b].[Author], [b].[Category], [b].[CoverFileName], [b].[Price], [b].[Title]\nFROM [Book] AS [b]\nWHERE [b].[BookID] = @__bookId_0"
+					"-- Ripple1313127786:[1]\n\nSELECT TOP(1) [c].[CartId], [c].[DateCreated], [c].[UserID]\nFROM [Cart] AS [c]\nWHERE [c].[UserID] = @__userId_0",
+					"-- Ripple1313127786:[4]\n\nSELECT [c].[CartItemId], [c].[CartId], [c].[ProductId], [c].[Quantity]\nFROM [CartItems] AS [c]\nWHERE [c].[CartId] = @__cartID_0",
+					"-- Ripple1313127786:[9]\n\nSELECT TOP(1) [b].[BookID], [b].[Author], [b].[Category], [b].[CoverFileName], [b].[Price], [b].[Title]\nFROM [Book] AS [b]\nWHERE [b].[BookID] = @__bookId_0"
 				],
 				"readOnly": false,
 				"hasTransactions": true
@@ -531,12 +1477,12 @@
 					}
 				],
 				"commands": [
-					"-- Ripple1319389179:[5]\n\nSELECT TOP(1) [c].[CartId], [c].[DateCreated], [c].[UserID]\nFROM [Cart] AS [c]\nWHERE [c].[UserID] = @__userId_0",
-					"-- Ripple1319389179:[13]\n\nSELECT TOP(1) [c].[CartItemId], [c].[CartId], [c].[ProductId], [c].[Quantity]\nFROM [CartItems] AS [c]\nWHERE [c].[ProductId] = @__8__locals1_bookId_0 AND [c].[CartId] = @__cartId_1",
+					"-- Ripple1313127786:[1]\n\nSELECT TOP(1) [c].[CartId], [c].[DateCreated], [c].[UserID]\nFROM [Cart] AS [c]\nWHERE [c].[UserID] = @__userId_0",
+					"-- Ripple1313127786:[17]\n\nSELECT TOP(1) [c].[CartItemId], [c].[CartId], [c].[ProductId], [c].[Quantity]\nFROM [CartItems] AS [c]\nWHERE [c].[ProductId] = @__8__locals1_bookId_0 AND [c].[CartId] = @__cartId_1",
 					"SET IMPLICIT_TRANSACTIONS OFF;\nSET NOCOUNT ON;\nUPDATE [CartItems] SET [CartId] = @p0, [ProductId] = @p1, [Quantity] = @p2\nOUTPUT 1\nWHERE [CartItemId] = @p3;\n",
-					"-- Ripple1319389179:[5]\n\nSELECT TOP(1) [c].[CartId], [c].[DateCreated], [c].[UserID]\nFROM [Cart] AS [c]\nWHERE [c].[UserID] = @__userId_0",
-					"-- Ripple1319389179:[8]\n\nSELECT [c].[CartItemId], [c].[CartId], [c].[ProductId], [c].[Quantity]\nFROM [CartItems] AS [c]\nWHERE [c].[CartId] = @__cartID_0",
-					"-- Ripple1319389179:[11]\n\nSELECT TOP(1) [b].[BookID], [b].[Author], [b].[Category], [b].[CoverFileName], [b].[Price], [b].[Title]\nFROM [Book] AS [b]\nWHERE [b].[BookID] = @__bookId_0"
+					"-- Ripple1313127786:[1]\n\nSELECT TOP(1) [c].[CartId], [c].[DateCreated], [c].[UserID]\nFROM [Cart] AS [c]\nWHERE [c].[UserID] = @__userId_0",
+					"-- Ripple1313127786:[4]\n\nSELECT [c].[CartItemId], [c].[CartId], [c].[ProductId], [c].[Quantity]\nFROM [CartItems] AS [c]\nWHERE [c].[CartId] = @__cartID_0",
+					"-- Ripple1313127786:[9]\n\nSELECT TOP(1) [b].[BookID], [b].[Author], [b].[Category], [b].[CoverFileName], [b].[Price], [b].[Title]\nFROM [Book] AS [b]\nWHERE [b].[BookID] = @__bookId_0"
 				],
 				"readOnly": false,
 				"hasTransactions": true
@@ -567,8 +1513,8 @@
 					}
 				],
 				"commands": [
-					"-- Ripple1319389179:[5]\n\nSELECT TOP(1) [c].[CartId], [c].[DateCreated], [c].[UserID]\nFROM [Cart] AS [c]\nWHERE [c].[UserID] = @__userId_0",
-					"-- Ripple1319389179:[10]\n\nSELECT COALESCE(SUM([c].[Quantity]), 0)\nFROM [CartItems] AS [c]\nWHERE [c].[CartId] = @__cartId_0"
+					"-- Ripple1313127786:[1]\n\nSELECT TOP(1) [c].[CartId], [c].[DateCreated], [c].[UserID]\nFROM [Cart] AS [c]\nWHERE [c].[UserID] = @__userId_0",
+					"-- Ripple1313127786:[16]\n\nSELECT COALESCE(SUM([c].[Quantity]), 0)\nFROM [CartItems] AS [c]\nWHERE [c].[CartId] = @__cartId_0"
 				],
 				"readOnly": true,
 				"hasTransactions": true
@@ -599,7 +1545,7 @@
 					}
 				],
 				"commands": [
-					"-- Ripple1319389179:[2]\n\nSELECT TOP(1) [u].[UserID], [u].[FirstName], [u].[Gender], [u].[LastName], [u].[Password], [u].[UserTypeID], [u].[Username]\nFROM [UserMaster] AS [u]\nWHERE [u].[Username] = @__userName_0"
+					"-- Ripple1313127786:[15]\n\nSELECT TOP(1) [u].[UserID], [u].[FirstName], [u].[Gender], [u].[LastName], [u].[Password], [u].[UserTypeID], [u].[Username]\nFROM [UserMaster] AS [u]\nWHERE [u].[Username] = @__userName_0"
 				],
 				"readOnly": false,
 				"hasTransactions": true
@@ -622,7 +1568,7 @@
 					}
 				],
 				"commands": [
-					"-- Ripple1319389179:[2]\n\nSELECT TOP(1) [u].[UserID], [u].[FirstName], [u].[Gender], [u].[LastName], [u].[Password], [u].[UserTypeID], [u].[Username]\nFROM [UserMaster] AS [u]\nWHERE [u].[Username] = @__userName_0"
+					"-- Ripple1313127786:[15]\n\nSELECT TOP(1) [u].[UserID], [u].[FirstName], [u].[Gender], [u].[LastName], [u].[Password], [u].[UserTypeID], [u].[Username]\nFROM [UserMaster] AS [u]\nWHERE [u].[Username] = @__userName_0"
 				],
 				"readOnly": true,
 				"hasTransactions": true
@@ -661,11 +1607,38 @@
 					}
 				],
 				"commands": [
-					"-- Ripple1319389179:[6]\n\nSELECT TOP(1) [w].[WishlistId], [w].[DateCreated], [w].[UserID]\nFROM [Wishlist] AS [w]\nWHERE [w].[UserID] = @__userId_0",
-					"-- Ripple1319389179:[18]\n\nSELECT [w].[WishlistItemId], [w].[ProductId], [w].[WishlistId]\nFROM [WishlistItems] AS [w]\nWHERE [w].[WishlistId] = @__wishlistId_0",
+					"-- Ripple1313127786:[5]\n\nSELECT TOP(1) [w].[WishlistId], [w].[DateCreated], [w].[UserID]\nFROM [Wishlist] AS [w]\nWHERE [w].[UserID] = @__userId_0",
+					"-- Ripple1313127786:[20]\n\nSELECT [w].[WishlistItemId], [w].[ProductId], [w].[WishlistId]\nFROM [WishlistItems] AS [w]\nWHERE [w].[WishlistId] = @__wishlistId_0",
 					"SET IMPLICIT_TRANSACTIONS OFF;\nSET NOCOUNT ON;\nDELETE FROM [WishlistItems]\nOUTPUT 1\nWHERE [WishlistItemId] = @p0;\n"
 				],
 				"readOnly": false,
+				"hasTransactions": true
+			},
+			{
+				"name": "BookCart.Controllers.WishlistController.Delete (BookCart)",
+				"transactions": [
+					{
+						"children": [],
+						"readTypes": [
+							"BookCart.Models.Wishlist"
+						],
+						"writeTypes": [],
+						"readOnly": true
+					},
+					{
+						"children": [],
+						"readTypes": [
+							"BookCart.Models.WishlistItems"
+						],
+						"writeTypes": [],
+						"readOnly": true
+					}
+				],
+				"commands": [
+					"-- Ripple1313127786:[5]\n\nSELECT TOP(1) [w].[WishlistId], [w].[DateCreated], [w].[UserID]\nFROM [Wishlist] AS [w]\nWHERE [w].[UserID] = @__userId_0",
+					"-- Ripple1313127786:[20]\n\nSELECT [w].[WishlistItemId], [w].[ProductId], [w].[WishlistId]\nFROM [WishlistItems] AS [w]\nWHERE [w].[WishlistId] = @__wishlistId_0"
+				],
+				"readOnly": true,
 				"hasTransactions": true
 			}
 		]
@@ -673,88 +1646,6 @@
 	{
 		"key": "BookCart.Controllers.WishlistController.Get (BookCart)",
 		"value": [
-			{
-				"name": "BookCart.Controllers.WishlistController.Get (BookCart)",
-				"transactions": [
-					{
-						"children": [],
-						"readTypes": [
-							"BookCart.Models.UserMaster"
-						],
-						"writeTypes": [],
-						"readOnly": true
-					},
-					{
-						"children": [],
-						"readTypes": [
-							"BookCart.Models.Wishlist"
-						],
-						"writeTypes": [],
-						"readOnly": true
-					},
-					{
-						"children": [],
-						"readTypes": [],
-						"writeTypes": [
-							"BookCart.Models.UserMaster",
-							"BookCart.Models.Wishlist"
-						],
-						"readOnly": false
-					},
-					{
-						"children": [],
-						"readTypes": [
-							"BookCart.Models.WishlistItems"
-						],
-						"writeTypes": [],
-						"readOnly": true
-					}
-				],
-				"commands": [
-					"-- Ripple1319389179:[4]\n\nSELECT TOP(1) [u].[UserID], [u].[FirstName], [u].[Gender], [u].[LastName], [u].[Password], [u].[UserTypeID], [u].[Username]\nFROM [UserMaster] AS [u]\nWHERE [u].[UserID] = @__userId_0",
-					"-- Ripple1319389179:[6]\n\nSELECT TOP(1) [w].[WishlistId], [w].[DateCreated], [w].[UserID]\nFROM [Wishlist] AS [w]\nWHERE [w].[UserID] = @__userId_0",
-					"SET IMPLICIT_TRANSACTIONS OFF;\nSET NOCOUNT ON;\nINSERT INTO [Wishlist] ([WishlistId], [DateCreated], [UserID])\nVALUES (@p0, @p1, @p2);\n",
-					"-- Ripple1319389179:[7]\n\nSELECT [w].[WishlistItemId], [w].[ProductId], [w].[WishlistId]\nFROM [WishlistItems] AS [w]\nWHERE [w].[WishlistId] = @__wishlistID_0"
-				],
-				"readOnly": false,
-				"hasTransactions": true
-			},
-			{
-				"name": "BookCart.Controllers.WishlistController.Get (BookCart)",
-				"transactions": [
-					{
-						"children": [],
-						"readTypes": [
-							"BookCart.Models.UserMaster"
-						],
-						"writeTypes": [],
-						"readOnly": true
-					},
-					{
-						"children": [],
-						"readTypes": [
-							"BookCart.Models.Wishlist"
-						],
-						"writeTypes": [],
-						"readOnly": true
-					},
-					{
-						"children": [],
-						"readTypes": [
-							"BookCart.Models.WishlistItems"
-						],
-						"writeTypes": [],
-						"readOnly": true
-					}
-				],
-				"commands": [
-					"-- Ripple1319389179:[4]\n\nSELECT TOP(1) [u].[UserID], [u].[FirstName], [u].[Gender], [u].[LastName], [u].[Password], [u].[UserTypeID], [u].[Username]\nFROM [UserMaster] AS [u]\nWHERE [u].[UserID] = @__userId_0",
-					"-- Ripple1319389179:[6]\n\nSELECT TOP(1) [w].[WishlistId], [w].[DateCreated], [w].[UserID]\nFROM [Wishlist] AS [w]\nWHERE [w].[UserID] = @__userId_0",
-					"-- Ripple1319389179:[7]\n\nSELECT [w].[WishlistItemId], [w].[ProductId], [w].[WishlistId]\nFROM [WishlistItems] AS [w]\nWHERE [w].[WishlistId] = @__wishlistID_0"
-				],
-				"readOnly": true,
-				"hasTransactions": true
-			},
 			{
 				"name": "BookCart.Controllers.WishlistController.Get (BookCart)",
 				"transactions": [
@@ -792,10 +1683,46 @@
 					}
 				],
 				"commands": [
-					"-- Ripple1319389179:[4]\n\nSELECT TOP(1) [u].[UserID], [u].[FirstName], [u].[Gender], [u].[LastName], [u].[Password], [u].[UserTypeID], [u].[Username]\nFROM [UserMaster] AS [u]\nWHERE [u].[UserID] = @__userId_0",
-					"-- Ripple1319389179:[6]\n\nSELECT TOP(1) [w].[WishlistId], [w].[DateCreated], [w].[UserID]\nFROM [Wishlist] AS [w]\nWHERE [w].[UserID] = @__userId_0",
-					"-- Ripple1319389179:[7]\n\nSELECT [w].[WishlistItemId], [w].[ProductId], [w].[WishlistId]\nFROM [WishlistItems] AS [w]\nWHERE [w].[WishlistId] = @__wishlistID_0",
-					"-- Ripple1319389179:[11]\n\nSELECT TOP(1) [b].[BookID], [b].[Author], [b].[Category], [b].[CoverFileName], [b].[Price], [b].[Title]\nFROM [Book] AS [b]\nWHERE [b].[BookID] = @__bookId_0"
+					"-- Ripple1313127786:[3]\n\nSELECT TOP(1) [u].[UserID], [u].[FirstName], [u].[Gender], [u].[LastName], [u].[Password], [u].[UserTypeID], [u].[Username]\nFROM [UserMaster] AS [u]\nWHERE [u].[UserID] = @__userId_0",
+					"-- Ripple1313127786:[5]\n\nSELECT TOP(1) [w].[WishlistId], [w].[DateCreated], [w].[UserID]\nFROM [Wishlist] AS [w]\nWHERE [w].[UserID] = @__userId_0",
+					"-- Ripple1313127786:[6]\n\nSELECT [w].[WishlistItemId], [w].[ProductId], [w].[WishlistId]\nFROM [WishlistItems] AS [w]\nWHERE [w].[WishlistId] = @__wishlistID_0",
+					"-- Ripple1313127786:[9]\n\nSELECT TOP(1) [b].[BookID], [b].[Author], [b].[Category], [b].[CoverFileName], [b].[Price], [b].[Title]\nFROM [Book] AS [b]\nWHERE [b].[BookID] = @__bookId_0"
+				],
+				"readOnly": true,
+				"hasTransactions": true
+			},
+			{
+				"name": "BookCart.Controllers.WishlistController.Get (BookCart)",
+				"transactions": [
+					{
+						"children": [],
+						"readTypes": [
+							"BookCart.Models.UserMaster"
+						],
+						"writeTypes": [],
+						"readOnly": true
+					},
+					{
+						"children": [],
+						"readTypes": [
+							"BookCart.Models.Wishlist"
+						],
+						"writeTypes": [],
+						"readOnly": true
+					},
+					{
+						"children": [],
+						"readTypes": [
+							"BookCart.Models.WishlistItems"
+						],
+						"writeTypes": [],
+						"readOnly": true
+					}
+				],
+				"commands": [
+					"-- Ripple1313127786:[3]\n\nSELECT TOP(1) [u].[UserID], [u].[FirstName], [u].[Gender], [u].[LastName], [u].[Password], [u].[UserTypeID], [u].[Username]\nFROM [UserMaster] AS [u]\nWHERE [u].[UserID] = @__userId_0",
+					"-- Ripple1313127786:[5]\n\nSELECT TOP(1) [w].[WishlistId], [w].[DateCreated], [w].[UserID]\nFROM [Wishlist] AS [w]\nWHERE [w].[UserID] = @__userId_0",
+					"-- Ripple1313127786:[6]\n\nSELECT [w].[WishlistItemId], [w].[ProductId], [w].[WishlistId]\nFROM [WishlistItems] AS [w]\nWHERE [w].[WishlistId] = @__wishlistID_0"
 				],
 				"readOnly": true,
 				"hasTransactions": true
@@ -867,13 +1794,76 @@
 					}
 				],
 				"commands": [
-					"-- Ripple1319389179:[6]\n\nSELECT TOP(1) [w].[WishlistId], [w].[DateCreated], [w].[UserID]\nFROM [Wishlist] AS [w]\nWHERE [w].[UserID] = @__userId_0",
-					"-- Ripple1319389179:[15]\n\nSELECT TOP(1) [w].[WishlistItemId], [w].[ProductId], [w].[WishlistId]\nFROM [WishlistItems] AS [w]\nWHERE [w].[ProductId] = @__bookId_0 AND [w].[WishlistId] = @__wishlistId_1",
+					"-- Ripple1313127786:[5]\n\nSELECT TOP(1) [w].[WishlistId], [w].[DateCreated], [w].[UserID]\nFROM [Wishlist] AS [w]\nWHERE [w].[UserID] = @__userId_0",
+					"-- Ripple1313127786:[19]\n\nSELECT TOP(1) [w].[WishlistItemId], [w].[ProductId], [w].[WishlistId]\nFROM [WishlistItems] AS [w]\nWHERE [w].[ProductId] = @__bookId_0 AND [w].[WishlistId] = @__wishlistId_1",
 					"SET IMPLICIT_TRANSACTIONS OFF;\nSET NOCOUNT ON;\nINSERT INTO [WishlistItems] ([ProductId], [WishlistId])\nOUTPUT INSERTED.[WishlistItemId]\nVALUES (@p0, @p1);\n",
-					"-- Ripple1319389179:[4]\n\nSELECT TOP(1) [u].[UserID], [u].[FirstName], [u].[Gender], [u].[LastName], [u].[Password], [u].[UserTypeID], [u].[Username]\nFROM [UserMaster] AS [u]\nWHERE [u].[UserID] = @__userId_0",
-					"-- Ripple1319389179:[6]\n\nSELECT TOP(1) [w].[WishlistId], [w].[DateCreated], [w].[UserID]\nFROM [Wishlist] AS [w]\nWHERE [w].[UserID] = @__userId_0",
-					"-- Ripple1319389179:[7]\n\nSELECT [w].[WishlistItemId], [w].[ProductId], [w].[WishlistId]\nFROM [WishlistItems] AS [w]\nWHERE [w].[WishlistId] = @__wishlistID_0",
-					"-- Ripple1319389179:[11]\n\nSELECT TOP(1) [b].[BookID], [b].[Author], [b].[Category], [b].[CoverFileName], [b].[Price], [b].[Title]\nFROM [Book] AS [b]\nWHERE [b].[BookID] = @__bookId_0"
+					"-- Ripple1313127786:[3]\n\nSELECT TOP(1) [u].[UserID], [u].[FirstName], [u].[Gender], [u].[LastName], [u].[Password], [u].[UserTypeID], [u].[Username]\nFROM [UserMaster] AS [u]\nWHERE [u].[UserID] = @__userId_0",
+					"-- Ripple1313127786:[5]\n\nSELECT TOP(1) [w].[WishlistId], [w].[DateCreated], [w].[UserID]\nFROM [Wishlist] AS [w]\nWHERE [w].[UserID] = @__userId_0",
+					"-- Ripple1313127786:[6]\n\nSELECT [w].[WishlistItemId], [w].[ProductId], [w].[WishlistId]\nFROM [WishlistItems] AS [w]\nWHERE [w].[WishlistId] = @__wishlistID_0",
+					"-- Ripple1313127786:[9]\n\nSELECT TOP(1) [b].[BookID], [b].[Author], [b].[Category], [b].[CoverFileName], [b].[Price], [b].[Title]\nFROM [Book] AS [b]\nWHERE [b].[BookID] = @__bookId_0"
+				],
+				"readOnly": false,
+				"hasTransactions": true
+			},
+			{
+				"name": "BookCart.Controllers.WishlistController.Post (BookCart)",
+				"transactions": [
+					{
+						"children": [],
+						"readTypes": [
+							"BookCart.Models.Wishlist"
+						],
+						"writeTypes": [],
+						"readOnly": true
+					},
+					{
+						"children": [],
+						"readTypes": [
+							"BookCart.Models.WishlistItems"
+						],
+						"writeTypes": [],
+						"readOnly": true
+					},
+					{
+						"children": [],
+						"readTypes": [],
+						"writeTypes": [
+							"BookCart.Models.Wishlist"
+						],
+						"readOnly": false
+					},
+					{
+						"children": [],
+						"readTypes": [
+							"BookCart.Models.UserMaster"
+						],
+						"writeTypes": [],
+						"readOnly": true
+					},
+					{
+						"children": [],
+						"readTypes": [
+							"BookCart.Models.Wishlist"
+						],
+						"writeTypes": [],
+						"readOnly": true
+					},
+					{
+						"children": [],
+						"readTypes": [
+							"BookCart.Models.WishlistItems"
+						],
+						"writeTypes": [],
+						"readOnly": true
+					}
+				],
+				"commands": [
+					"-- Ripple1313127786:[5]\n\nSELECT TOP(1) [w].[WishlistId], [w].[DateCreated], [w].[UserID]\nFROM [Wishlist] AS [w]\nWHERE [w].[UserID] = @__userId_0",
+					"-- Ripple1313127786:[19]\n\nSELECT TOP(1) [w].[WishlistItemId], [w].[ProductId], [w].[WishlistId]\nFROM [WishlistItems] AS [w]\nWHERE [w].[ProductId] = @__bookId_0 AND [w].[WishlistId] = @__wishlistId_1",
+					"SET IMPLICIT_TRANSACTIONS OFF;\nSET NOCOUNT ON;\nDELETE FROM [WishlistItems]\nOUTPUT 1\nWHERE [WishlistItemId] = @p0;\n",
+					"-- Ripple1313127786:[3]\n\nSELECT TOP(1) [u].[UserID], [u].[FirstName], [u].[Gender], [u].[LastName], [u].[Password], [u].[UserTypeID], [u].[Username]\nFROM [UserMaster] AS [u]\nWHERE [u].[UserID] = @__userId_0",
+					"-- Ripple1313127786:[5]\n\nSELECT TOP(1) [w].[WishlistId], [w].[DateCreated], [w].[UserID]\nFROM [Wishlist] AS [w]\nWHERE [w].[UserID] = @__userId_0",
+					"-- Ripple1313127786:[6]\n\nSELECT [w].[WishlistItemId], [w].[ProductId], [w].[WishlistId]\nFROM [WishlistItems] AS [w]\nWHERE [w].[WishlistId] = @__wishlistID_0"
 				],
 				"readOnly": false,
 				"hasTransactions": true
@@ -881,27 +1871,7 @@
 		]
 	},
 	{
-		"key": "BookCart.Controllers.BookController.Post (BookCart)",
-		"value": [
-			{
-				"name": "BookCart.Controllers.BookController.Post (BookCart)",
-				"transactions": [],
-				"commands": [],
-				"readOnly": true,
-				"hasTransactions": false
-			}
-		]
-	},
-	{
 		"key": "BookCart.Controllers.BookController.Put (BookCart)",
-		"value": [
-			{
-				"name": "BookCart.Controllers.BookController.Put (BookCart)",
-				"transactions": [],
-				"commands": [],
-				"readOnly": true,
-				"hasTransactions": false
-			}
-		]
+		"value": []
 	}
 ]

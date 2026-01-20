@@ -51,9 +51,31 @@ Console.WriteLine("\n--- Phase 2: Book Management (Admin) ---");
 int lastBookId = 0;
 for (int i = 1; i <= 10; i++)
 {
-    var book = new Book(0, $"C# Mastery Vol {i}", "Tech Author", "Programming", 29.99 + i, $"cover{i}.jpg");
-    var res = await http.PostAsJsonAsync("/api/Book", book);
-    if (res.IsSuccessStatusCode) lastBookId = await res.Content.ReadFromJsonAsync<int>();
+    var book = new Book(0, $"C# Mastery Vol {i}", "Tech Author", "Programming", 29.99 + i, "");
+
+    using var content = new MultipartFormDataContent();
+
+    // 1. Add the book metadata as a string field
+    string bookJson = JsonSerializer.Serialize(book);
+    content.Add(new StringContent(bookJson), "bookFormData");
+
+    // 2. Add the actual file (assuming the file exists locally)
+    var filePath = $@"../BookCart/wwwroot/Upload/63df0288-6589-4e4c-8a68-def0bbf72714qa.jpg";
+    if (File.Exists(filePath))
+    {
+        var fileStream = new FileStream(filePath, FileMode.Open);
+        var fileContent = new StreamContent(fileStream);
+        fileContent.Headers.ContentType = new MediaTypeHeaderValue("image/jpeg");
+        content.Add(fileContent, "file", $"cover{i}.jpg"); // The name "file" doesn't matter as much as the index
+    }
+
+    var res = await http.PostAsync("/api/Book", content);
+
+    if (res.IsSuccessStatusCode)
+    {
+        var stringId = await res.Content.ReadAsStringAsync();
+        lastBookId = int.Parse(stringId);
+    }
 }
 Console.WriteLine($"[POST] Added 10 books. Last Book ID: {lastBookId}");
 
