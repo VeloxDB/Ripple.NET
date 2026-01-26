@@ -17,6 +17,7 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="9.0.0" />
+    <PackageReference Include="SqlParserCS" Version="0.6.5" />
   </ItemGroup>
 
 </Project>
