@@ -91,7 +91,7 @@ public static class RippleExtensions
 
                     string json = await new StreamReader(stream).ReadToEndAsync();
 
-                    var apiCalls =  JsonSerializer.Deserialize<KeyValuePair<string, List<APICall>>[]>(json, options);
+                    var apiCalls = JsonSerializer.Deserialize<KeyValuePair<string, List<APICall>>[]>(json, options);
 
                     if (apiCalls != null)
                     {
@@ -146,16 +146,17 @@ public static class RippleExtensions
         return app;
     }
 
-    #if DEBUG
+#if DEBUG
     private static string GetCurrentFileName([CallerFilePath] string fileName = "")
     {
         return fileName;
     }
-    #endif
+#endif
 
     public static DbContextOptionsBuilder UseRippleDbInterceptor(
         this DbContextOptionsBuilder optionsBuilder)
     {
+        DbProvider provider = GetDbProvider(optionsBuilder.Options);
         var serviceProvider = optionsBuilder.Options.GetExtension<CoreOptionsExtension>()?.ApplicationServiceProvider;
         var rippleService = serviceProvider?.GetService<RippleService>();
         if (rippleService == null)
@@ -163,7 +164,37 @@ public static class RippleExtensions
             throw new InvalidOperationException("RippleService is not registered in the service provider. Please ensure that AddRipple() is called during service configuration.");
         }
         var interceptor = rippleService.Interceptor;
+        interceptor.SetDbProvider(provider);
         interceptor.Register(optionsBuilder);
         return optionsBuilder;
     }
+
+    private static readonly Dictionary<string, DbProvider> providerMap = new Dictionary<string, DbProvider>()
+    {
+        { "SqlServerOptionsExtension", DbProvider.SqlServer },
+        { "SqliteOptionsExtension", DbProvider.Sqlite },
+        { "NpgsqlOptionsExtension", DbProvider.Npgsql },
+        { "MySqlOptionsExtension", DbProvider.MySql }
+    };
+
+    private static DbProvider GetDbProvider(this DbContextOptions options)
+    {
+        foreach (var extension in options.Extensions)
+        {
+            if (providerMap.TryGetValue(extension.GetType().Name, out var provider))
+            {
+                return provider;
+            }
+        }
+        return DbProvider.Unknown;
+    }
+}
+
+public enum DbProvider
+{
+    Unknown,
+    SqlServer,
+    Sqlite,
+    Npgsql,
+    MySql
 }

@@ -14,6 +14,8 @@ internal class Interceptor
 	private readonly RippleDBCommandInterceptor commandInterceptor;
 	private readonly RippleDBTransactionInterceptor transactionInterceptor;
 
+	private SQLParser? sqlParser;
+
 	public Interceptor()
 	{
 		commandInterceptor = new RippleDBCommandInterceptor(this);
@@ -136,12 +138,20 @@ internal class Interceptor
 
 	private void RecordCommand(string commandText)
 	{
-		dbLineage.Value?.RecordCommand(commandText);
+		if(sqlParser == null)
+		{
+			return;
+		}
+		dbLineage.Value?.RecordCommand(commandText, sqlParser);
 	}
 
 	private void EndTransaction()
 	{
-		dbLineage.Value?.EndTransaction();
+		if(sqlParser == null)
+		{
+			return;
+		}
+		dbLineage.Value?.EndTransaction(sqlParser);
 	}
 
 	private void StartTransaction()
@@ -155,5 +165,10 @@ internal class Interceptor
 			commandInterceptor,
 			transactionInterceptor
 		);
+	}
+
+	public void SetDbProvider(DbProvider provider)
+	{
+		this.sqlParser = SQLParser.CreateParser(provider);
 	}
 }

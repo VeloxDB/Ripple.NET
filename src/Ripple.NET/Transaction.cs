@@ -89,9 +89,10 @@ internal class TransactionBuilder
 		commands.Clear();
 	}
 
-	public Transaction Build()
+	public Transaction Build(SQLParser sqlParser)
 	{
-		return new Transaction([], [], [.. commands], [.. children]);
+		sqlParser.ParseCommands(commands, out var readTypes, out var writeTypes);
+		return new Transaction(readTypes, writeTypes, [.. commands], [.. children]);
 	}
 }
 

@@ -17,7 +17,7 @@ internal class DBLineage
 		transactionStack.Push(new TransactionBuilder());
 	}
 
-	public void EndTransaction()
+	public void EndTransaction(SQLParser sqlParser)
 	{
 		if (transactionStack.Count == 0)
 		{
@@ -25,7 +25,7 @@ internal class DBLineage
 		}
 
 		var builder = transactionStack.Pop();
-		var transaction = builder.Build();
+		var transaction = builder.Build(sqlParser);
 
 		if (transactionStack.Count == 0)
 		{
@@ -43,7 +43,7 @@ internal class DBLineage
 	}
 
 
-	public void RecordCommand(string commandText)
+	public void RecordCommand(string commandText, SQLParser sqlParser)
 	{
 		if (transactionStack.Count > 0)
 		{
@@ -51,8 +51,8 @@ internal class DBLineage
 		}
 		else
 		{
-			// TODO: Add parsing to determine read/write sets
-			transactions.Add(new Transaction([], [], [commandText], []));
+			sqlParser.ParseCommands([commandText], out var readTypes, out var writeTypes);
+			transactions.Add(new Transaction(readTypes, writeTypes, [commandText], []));
 		}
 	}
 }
