@@ -9,6 +9,7 @@ internal class Transaction
 	private readonly Transaction[]? children;
 	private readonly HashSet<string> readTypes;
 	private readonly HashSet<string> writeTypes;
+	private readonly string[] commands;
 	int hashCodeCache = 0;
 
 	public IReadOnlyCollection<Transaction> Children => children ?? Array.Empty<Transaction>();
@@ -17,12 +18,15 @@ internal class Transaction
 
 	public IReadOnlyCollection<string> WriteTypes => writeTypes;
 
+	public IReadOnlyCollection<string> Commands => commands;
+
 	public bool ReadOnly => writeTypes.Count == 0;
 
-	public Transaction(IReadOnlyCollection<string> readTypes, IReadOnlyCollection<string> writeTypes, Transaction[]? children = null)
+	public Transaction(IReadOnlyCollection<string> readTypes, IReadOnlyCollection<string> writeTypes, string[] commands, Transaction[]? children = null)
 	{
 		this.readTypes = [.. readTypes];
 		this.writeTypes = [.. writeTypes];
+		this.commands = commands;
 		this.children = children;
 	}
 
@@ -66,18 +70,12 @@ internal class Transaction
 
 internal class TransactionBuilder
 {
-	private HashSet<string> readTypes = new HashSet<string>();
-	private HashSet<string> writeTypes = new HashSet<string>();
 	private List<Transaction> children = new List<Transaction>();
+	private List<string> commands = new List<string>();
 
-	public void RecordRead(IReadOnlyCollection<string> types)
+	public void RecordCommands(IEnumerable<string> cmds)
 	{
-		readTypes.UnionWith(types);
-	}
-
-	public void RecordWrite(IReadOnlyCollection<string> types)
-	{
-		writeTypes.UnionWith(types);
+		commands.AddRange(cmds);
 	}
 
 	public void AddChild(Transaction transaction)
@@ -87,14 +85,13 @@ internal class TransactionBuilder
 
 	public void Clear()
 	{
-		readTypes.Clear();
-		writeTypes.Clear();
 		children.Clear();
+		commands.Clear();
 	}
 
 	public Transaction Build()
 	{
-		return new Transaction(readTypes, writeTypes, [.. children]);
+		return new Transaction([], [], [.. commands], [.. children]);
 	}
 }
 
@@ -107,6 +104,7 @@ internal class TransactionConverter : JsonConverter<Transaction>
 		// Local variables to hold data until we call the constructor
 		IReadOnlyCollection<string> readTypes = Array.Empty<string>();
 		IReadOnlyCollection<string> writeTypes = Array.Empty<string>();
+		string[] commands = Array.Empty<string>();
 		Transaction[]? children = null;
 
 		while (reader.Read())
@@ -126,6 +124,9 @@ internal class TransactionConverter : JsonConverter<Transaction>
 					case "writetypes":
 						writeTypes = JsonSerializer.Deserialize<string[]>(ref reader, options) ?? Array.Empty<string>();
 						break;
+					case "commands":
+						commands = JsonSerializer.Deserialize<string[]>(ref reader, options) ?? Array.Empty<string>();
+						break;
 					case "children":
 						// This handles the recursion automatically
 						children = JsonSerializer.Deserialize<Transaction[]>(ref reader, options);
@@ -138,7 +139,7 @@ internal class TransactionConverter : JsonConverter<Transaction>
 			}
 		}
 
-		return new Transaction(readTypes, writeTypes, children);
+		return new Transaction(readTypes, writeTypes, commands, children);
 	}
 
 	public override void Write(Utf8JsonWriter writer, Transaction value, JsonSerializerOptions options)
@@ -150,6 +151,9 @@ internal class TransactionConverter : JsonConverter<Transaction>
 
 		writer.WritePropertyName("writeTypes");
 		JsonSerializer.Serialize(writer, value.WriteTypes, options);
+
+		writer.WritePropertyName("commands");
+		JsonSerializer.Serialize(writer, value.Commands, options);
 
 		writer.WritePropertyName("children");
 		JsonSerializer.Serialize(writer, value.Children, options);

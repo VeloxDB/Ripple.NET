@@ -11,17 +11,13 @@ internal class Interceptor
 {
 	AsyncLocal<DBLineage> dbLineage = new AsyncLocal<DBLineage>();
 
-	private readonly RippleQueryExpressionInterceptor queryInterceptor;
 	private readonly RippleDBCommandInterceptor commandInterceptor;
 	private readonly RippleDBTransactionInterceptor transactionInterceptor;
-	private readonly RippleDBSaveChangesInterceptor saveChangesInterceptor;
 
 	public Interceptor()
 	{
-		queryInterceptor = new RippleQueryExpressionInterceptor();
-		commandInterceptor = new RippleDBCommandInterceptor(queryInterceptor, this);
+		commandInterceptor = new RippleDBCommandInterceptor(this);
 		transactionInterceptor = new RippleDBTransactionInterceptor(this);
-		saveChangesInterceptor = new RippleDBSaveChangesInterceptor(this);
 	}
 
 	public void StartAPICall(Endpoint endpoint)
@@ -38,46 +34,7 @@ internal class Interceptor
 		}
 
 		var transactions = dbLineage.GetTransactions();
-		var commands = dbLineage.GetCommands();
-
-		return new APICall(
-			dbLineage.Name,
-			transactions,
-			commands
-		);
-	}
-
-	private class RippleDBSaveChangesInterceptor : SaveChangesInterceptor
-	{
-		private Interceptor interceptor;
-
-		public RippleDBSaveChangesInterceptor(Interceptor interceptor)
-		{
-			this.interceptor = interceptor;
-		}
-
-		public override ValueTask<InterceptionResult<int>> SavingChangesAsync(DbContextEventData eventData, InterceptionResult<int> result, CancellationToken cancellationToken = default)
-		{
-			TrackEntityChanges(eventData);
-
-			return base.SavingChangesAsync(eventData, result, cancellationToken);
-		}
-
-		public override int SavedChanges(SaveChangesCompletedEventData eventData, int result)
-		{
-			TrackEntityChanges(eventData);
-			return base.SavedChanges(eventData, result);
-		}
-
-		private void TrackEntityChanges(DbContextEventData eventData)
-		{
-			if (eventData.Context != null)
-			{
-				HashSet<string> modifiedTypes = [.. eventData.Context.ChangeTracker.Entries()
-								.Select(e => e.Entity.GetType().FullName ?? throw new InvalidOperationException("Type name is null"))];
-				interceptor.RecordWrite(modifiedTypes);
-			}
-		}
+		return new APICall(dbLineage.Name, transactions);
 	}
 
 	private class RippleDBTransactionInterceptor : DbTransactionInterceptor
@@ -128,12 +85,10 @@ internal class Interceptor
 
 	private class RippleDBCommandInterceptor : DbCommandInterceptor
 	{
-		private RippleQueryExpressionInterceptor queryInterceptor;
 		private Interceptor interceptor;
 
-		public RippleDBCommandInterceptor(RippleQueryExpressionInterceptor queryInterceptor, Interceptor interceptor)
+		public RippleDBCommandInterceptor(Interceptor interceptor)
 		{
-			this.queryInterceptor = queryInterceptor;
 			this.interceptor = interceptor;
 		}
 
@@ -175,11 +130,6 @@ internal class Interceptor
 
 		private void RecordCommandTypes(DbCommand command)
 		{
-			var types = queryInterceptor.GetTypesFromCommand(command.CommandText);
-			if (types != null)
-			{
-				interceptor.RecordRead(types);
-			}
 			interceptor.RecordCommand(command.CommandText);
 		}
 	}
@@ -187,15 +137,6 @@ internal class Interceptor
 	private void RecordCommand(string commandText)
 	{
 		dbLineage.Value?.RecordCommand(commandText);
-	}
-
-	private void RecordRead(IReadOnlyCollection<string> types)
-	{
-		dbLineage.Value?.RecordRead(types);
-	}
-	private void RecordWrite(IReadOnlyCollection<string> types)
-	{
-		dbLineage.Value?.RecordWrite(types);
 	}
 
 	private void EndTransaction()
@@ -207,14 +148,12 @@ internal class Interceptor
 	{
 		dbLineage.Value?.StartTransaction();
 	}
-	
+
 	public void Register(DbContextOptionsBuilder optionsBuilder)
 	{
 		optionsBuilder.AddInterceptors(
 			commandInterceptor,
-			transactionInterceptor,
-			saveChangesInterceptor,
-			queryInterceptor
+			transactionInterceptor
 		);
 	}
 }

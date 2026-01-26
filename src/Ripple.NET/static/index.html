@@ -253,7 +253,6 @@
             padding: 8px;
             margin-top: 4px;
             border-radius: 3px;
-            white-space: pre-wrap;
             border-left: 2px solid var(--accent);
         }
 
@@ -393,20 +392,6 @@
                             });
                         }
 
-                        if (call.commands?.length) {
-                            let commandsHtml = `
-                                    <div class="commands-container">
-                                        <details>
-                                            <summary class="commands-summary">View SQL Commands (${call.commands.length})</summary>
-                                            <ul class="sql-list">
-                                                ${call.commands.map(cmd => `<li class="sql-item">${escapeHtml(cmd)}</li>`).join('')}
-                                            </ul>
-                                        </details>
-                                    </div>`;
-
-                            callEl.insertAdjacentHTML('beforeend', commandsHtml);
-                        }
-
                         groupEl.appendChild(callEl);
                     });
                 }
@@ -415,7 +400,7 @@
         }
 
         function changeHandler(e, call) {
-            if(e.isTrusted)
+            if (e.isTrusted)
                 toggleSelection(call);
         }
 
@@ -458,6 +443,16 @@
             if (tx.writeTypes?.length) {
                 html += `<span class="label">Writes</span>`;
                 tx.writeTypes.forEach(t => html += `<span class="type-tag write">${t}</span>`);
+            }
+
+            if (tx.commands?.length) {
+                html += `
+            <span class="label">SQL Commands (${tx.commands.length})</span>
+            <ul class="sql-list">
+                ${tx.commands.map(cmd =>
+                    `<li class="sql-item">${escapeHtml(cmd)}</li>`
+                ).join('')}
+            </ul>`;
             }
 
 
@@ -569,8 +564,8 @@
 
                     allTags.forEach(tag => {
                         if (!resourceMap[tag]) resourceMap[tag] = { readers: [], writers: [] };
-                        if (writes.has(tag)) resourceMap[tag].writers.push({id:callId, call:call});
-                        else resourceMap[tag].readers.push({id:callId, call:call});
+                        if (writes.has(tag)) resourceMap[tag].writers.push({ id: callId, call: call });
+                        else resourceMap[tag].readers.push({ id: callId, call: call });
                     });
                 });
             });
@@ -632,16 +627,16 @@
                 toggleSelection(call);
             });
 
-            cy.on('tap', 'edge', function(evt) {
+            cy.on('tap', 'edge', function (evt) {
                 const edgeData = evt.target.data();
                 toggleSelection(edgeData.sourceCall, edgeData.targetCall);
 
                 reentryGuard = true; // Prevent reentry during programmatic selection
-                if(selected.has(edgeData.sourceCall) && selected.has(edgeData.targetCall)) {
+                if (selected.has(edgeData.sourceCall) && selected.has(edgeData.targetCall)) {
                     // Select nodes in the graph
                     cy.getElementById(edgeData.source).select();
                     cy.getElementById(edgeData.target).select();
-                }else{
+                } else {
                     // Deselect nodes in the graph
                     cy.getElementById(edgeData.source).unselect();
                     cy.getElementById(edgeData.target).unselect();
@@ -672,14 +667,35 @@
                         </div>
                         <div style="font-size: 0.7em; font-weight: bold; margin-bottom: 5px; opacity: 0.5;">SQL SEQUENCE</div>`;
 
-                if (!call.commands || call.commands.length === 0) {
+                const renderTxCommands = (tx, depth = 0) => {
+                    let out = '';
+
+                    if (tx.commands?.length) {
+                        out += tx.commands.map(cmd =>
+                            `<li class="sql-item" style="margin-left:${depth * 12}px">
+                ${escapeHtml(cmd)}
+            </li>`
+                        ).join('');
+                    }
+
+                    if (tx.children?.length) {
+                        tx.children.forEach(c =>
+                            out += renderTxCommands(c, depth + 1)
+                        );
+                    }
+
+                    return out;
+                };
+
+                const allCommands =
+                    call.transactions?.map(tx => renderTxCommands(tx)).join('') ?? '';
+
+                if (!allCommands) {
                     callHtml += `<div>No SQL commands recorded.</div>`;
                 } else {
-                    callHtml += `
-                    <ul class="sql-list">
-                        ${call.commands?.map(cmd => `<li class="sql-item">${escapeHtml(cmd)}</li>`).join('')}
-                    </ul>`;
+                    callHtml += `<ul class="sql-list">${allCommands}</ul>`;
                 }
+
 
                 callHtml += `</div>`;
                 col.innerHTML = callHtml;

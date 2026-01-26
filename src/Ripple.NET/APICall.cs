@@ -7,20 +7,17 @@ internal class APICall
 {
 	private string name;
 	private Transaction[] transactions;
-	private string[] commands;
 
 	public string Name => name;
 	public IReadOnlyCollection<Transaction> Transactions => transactions;
-	public IReadOnlyCollection<string> Commands => commands;
 
 	public bool ReadOnly { get; private set;}
 	public bool HasTransactions { get; private set;}
 
-	public APICall(string name, IReadOnlyCollection<Transaction> transactions, string[] commands)
+	public APICall(string name, IReadOnlyCollection<Transaction> transactions)
 	{
 		this.name = name;
 		this.transactions = [..transactions];
-		this.commands = [..commands];
 
 		HasTransactions = false;
 		ReadOnly = true;
@@ -119,7 +116,7 @@ internal class APICallConverter : JsonConverter<APICall>
 
 		if (name == null || transactions == null) throw new JsonException("Missing required properties for APICall.");
 
-        return new APICall(name, transactions, commands);
+        return new APICall(name, transactions);
     }
 
     public override void Write(Utf8JsonWriter writer, APICall value, JsonSerializerOptions options)
